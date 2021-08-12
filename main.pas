@@ -114,7 +114,7 @@ var
 implementation
 
 uses
-  Math;
+  Math, IntfGraphics;
 
 {$R *.lfm}
 
@@ -338,7 +338,7 @@ end;
 
 procedure TMainForm.ScrollBox1Paint(Sender: TObject);
 const
-  CheckPatternSize = 32;
+  CheckPatternSize = 8;
 var
   ColorPattern: array[0..1] of TColor = (clLtGray, clWhite);
   I, J: Integer;
