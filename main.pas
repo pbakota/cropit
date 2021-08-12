@@ -8,6 +8,9 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
   Buttons, ActnList, StdActns, StdCtrls, Spin, fgl;
 
+const
+  MaxUndoDepth = 50;
+
 type
 
   TBitmapList = specialize TFPGObjectList<TBitmap>;
@@ -19,13 +22,13 @@ type
   { TMainForm }
 
   TMainForm = class(TForm)
+    EditPaste: TAction;
+    EditCopy: TAction;
+    EditUndo: TAction;
     SpeedButton16: TSpeedButton;
     ToolCrop: TAction;
     SpeedButton15: TSpeedButton;
     ToolErase: TAction;
-    EditCopy1: TEditCopy;
-    EditPaste1: TEditPaste;
-    EditUndo1: TEditUndo;
     FColorButton: TColorButton;
     ColorDialog1: TColorDialog;
     DrawingText: TAction;
@@ -70,7 +73,7 @@ type
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
-    procedure EditUndo1Execute(Sender: TObject);
+    procedure EditUndoExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -91,15 +94,16 @@ type
     FPenWidth: Integer;
     FSelection: TRect;
     FBlurRadius: Integer;
-    FUndoStack: TBitmapList;
+    FUndoStack: packed array[0..MaxUndoDepth] of TBitmap;
+    FUndoIndex: Integer;
     procedure NewBitmap;
     function GetCurDrawingTool: TDrawingTool;
     function ValidSelection: Boolean;
     procedure DrawArrow(ACanvas: TCanvas; X1,Y1,X2,Y2: Integer);
     procedure ClearSelection;
     procedure SaveUndo;
-    procedure Undo;
-    procedure Blurred(var bitmap: TBitmap; area: TRect; radius: Integer);
+    procedure DoUndo;
+    procedure CloneBitmap(var dst: TBitmap; src: TBitmap);
   public
 
   end;
@@ -110,7 +114,7 @@ var
 implementation
 
 uses
-  Math, IntfGraphics;
+  Math;
 
 {$R *.lfm}
 
@@ -124,7 +128,7 @@ begin
   FileSaveAs1.Dialog.DefaultExt:='png';
   FileSaveAs1.Dialog.Options:=[ofOverwritePrompt, ofPathMustExist, ofAutoPreview, ofViewDetail];
 
-  FUndoStack := TBitmapList.Create;
+  FUndoIndex := 0; // Empty stack
   FPenWidth := 3;
   SpeedButton4.Down := True;
   DrawingFreehand.Checked:= True;
@@ -134,15 +138,21 @@ begin
   NewBitmap;
 end;
 
-procedure TMainForm.EditUndo1Execute(Sender: TObject);
+procedure TMainForm.EditUndoExecute(Sender: TObject);
 begin
-  Undo;
+  DoUndo;
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
+var
+  I: Integer;
 begin
   if Assigned(FBitmap) then FBitmap.Free;
-  FUndoStack.Free;
+  if FUndoIndex <> 0 then begin
+    for I:=0 to FUndoIndex-1 do begin
+      FUndoStack[i].Free;
+    end;
+  end;
 end;
 
 procedure TMainForm.PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -152,6 +162,9 @@ begin
   FStartPos.X := X;
   FStartPos.Y := Y;
   FSelection := Rect(0,0,0,0);
+
+  if GetCurDrawingTool = dtFreeHand then
+    SaveUndo;
 end;
 
 procedure TMainForm.PaintBox1MouseMove(Sender: TObject; Shift: TShiftState; X,
@@ -297,7 +310,7 @@ begin
   if GetCurDrawingTool = dtSelect then begin
     // Save selection
     FSelection := Rect(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
-    StatusBar1.SimpleText := Format('Selection: %dx%d', [FSelection.Width, FSelection.Height]);
+    StatusBar1.SimpleText := Format('Selection: %dx%d', [Abs(FSelection.Width), Abs(FSelection.Height)]);
     // Make selected are visible even when the mouse button is released.
     with PaintBox1.Canvas do begin
       Brush.Style := bsClear;
@@ -319,6 +332,7 @@ begin
     cx := 0;
     cy := 0;
     PaintBox1.Canvas.Draw(cx,cy,FBitmap);
+    //WriteLn(DateTimeToStr(Now) + 'Repainted');
   end;
 end;
 
@@ -343,17 +357,14 @@ begin
 end;
 
 procedure TMainForm.ToolBlurExecute(Sender: TObject);
-var
-  s: string;
-  l: LongInt;
 begin
   if not ValidSelection then Exit;
 
   SaveUndo;
   with FBitmap.Canvas do begin
-    //Pen.Color := FColorButton.ButtonColor;
-    //Pen.Style := psSolid;
-    //Pen.Width:=3;
+    Brush.Style := bsSolid;
+    Brush.Color := clWhite;
+    FillRect(FSelection);
     Brush.Style := bsDiagCross;
     Brush.Color := FColorButton.ButtonColor;
     FillRect(FSelection);
@@ -361,16 +372,6 @@ begin
 
   ClearSelection;
   PaintBox1.Repaint;
-
-  {$IFDEF XXXIGNORE}
-  s := InputBox('Enter blur radius', 'Radius:', IntToStr(FBlurRadius));
-  if (Length(s)<>0) and TryStrToInt(s, l) then begin
-    FBlurRadius:= l;
-    Blurred(FBitmap, FSelection, FBlurRadius);
-    ClearSelection;
-    PaintBox1.Repaint;
-  end;
-  {$ENDIF}
 end;
 
 procedure TMainForm.ToolCropExecute(Sender: TObject);
@@ -430,18 +431,37 @@ begin
 end;
 
 procedure TMainForm.SaveUndo;
-begin
-  FUndoStack.Add(FBitmap);
-end;
-
-procedure TMainForm.Undo;
 var
   tmp: TBitmap;
 begin
-  if FUndoStack.Count = 0 then Exit;
-  tmp := FUndoStack.Last;
-  FBitmap := tmp;
-  FUndoStack.Remove(tmp);
+  if FUndoIndex = MaxUndoDepth-1 then begin
+    ShowMessage('Too many undo');
+    FMouseDown:=False;
+    Exit;
+  end;
+  tmp := TBitmap.Create;
+  CloneBitmap(tmp, FBitmap);
+  FUndoStack[FUndoIndex] := tmp;
+  FUndoIndex := FUndoIndex + 1;
+end;
+
+procedure TMainForm.DoUndo;
+var
+  tmp: TBitmap;
+begin
+  if FUndoIndex = 0 then Exit;
+  FUndoIndex := FUndoIndex - 1;
+  tmp := FUndoStack[FUndoIndex];
+  CloneBitmap(FBitmap, tmp);
+  tmp.Free;
+
+  PaintBox1.Repaint;
+end;
+
+procedure TMainForm.CloneBitmap(var dst: TBitmap; src: TBitmap);
+begin
+  dst.SetSize(src.Width, src.Height);
+  dst.Canvas.CopyRect(Rect(0,0,src.Width,src.Height), src.Canvas, Rect(0,0,src.Width,src.Height));
 end;
 
 function TMainForm.GetCurDrawingTool: TDrawingTool;
@@ -478,147 +498,6 @@ begin
 
   ACanvas.Line(X2,Y2,ap1.X, ap1.Y);
   ACanvas.Line(X2,Y2,ap2.X, ap2.Y);
-end;
-
-procedure TMainForm.Blurred(var bitmap: TBitmap; area: TRect; radius: Integer);
-var
-  tab: array of Integer = ( 14, 10, 8, 6, 5, 5, 4, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2 );
-  i,j, row, col, i1, i2, bpl, alpha, r1, r2, c1, c2: Integer;
-  image: TLazIntfImage;
-  rgba: array[0..3] of Integer;
-  p: PByte;
-begin
-  if radius < 1 then alpha := 16 else
-  if radius > 17 then alpha := 1 else
-    alpha := tab[radius-1];
-
-  r1 := area.Top;
-  r2 := area.Bottom;
-  c1 := area.Left;
-  c2 := area.Right;
-
-  image := bitmap.CreateIntfImage;
-  bpl := image.DataDescription.BytesPerLine;
-
-  i1 := 0;
-  i2 := 3;
-
-  (*
-  for (int col = c1; col <= c2; col++) {
-    p = result.scanLine(r1) + col * 4;
-    for (int i = i1; i <= i2; i++)
-      rgba[i] = p[i] << 4;
-
-    p += bpl;
-    for (int j = r1; j < r2; j++, p += bpl)
-      for (int i = i1; i <= i2; i++)
-	p[i] = (rgba[i] += ((p[i] << 4) - rgba[i]) * alpha / 16) >> 4;
-  }
-  *)
-  for col := c1 to c2+1 do begin
-    p := image.GetDataLineStart(r1) + col * 4;
-    WriteLn(Format('%p', [p]));
-    for i := i1 to i2+1 do begin
-      rgba[i] := p[i] shl 4;
-    end;
-    p := image.GetDataLineStart(r1+1) + col * 4;
-    for j := r1 to r2 do begin
-      for i := i1 to i2+1 do begin
-        inc(rgba[i], (((p[i] shl 4) - rgba[i]) * alpha div 16) shr 4);
-        p[i] := rgba[i];
-      end;
-      p := image.GetDataLineStart(j-r1+1) + col * 4;
-    end;
-  end;
-
-  {$IFDEF XXXX}
-  (*
-  for (int row = r1; row <= r2; row++) {
-    p = result.scanLine(row) + c1 * 4;
-    for (int i = i1; i <= i2; i++)
-      rgba[i] = p[i] << 4;
-
-    p += 4;
-    for (int j = c1; j < c2; j++, p += 4)
-      for (int i = i1; i <= i2; i++)
-      p[i] = (rgba[i] += ((p[i] << 4) - rgba[i]) * alpha / 16) >> 4;
-  }
-  *)
-  for row := r1 to r2+1 do begin
-    p := image.GetDataLineStart(row) + c1 * 4;
-    for i := i1 to i2+1 do begin
-      rgba[i] := p[i] shl 4;
-    end;
-
-    inc(p, 4);
-    for j := c1 to c2 do begin
-      for i := i1 to i2+1 do begin
-        inc(rgba[i], (((p[i] shl 4) - rgba[i]) * alpha div 16) shr 4);
-        p[i] := rgba[i];
-      end;
-      inc(p, 4);
-    end;
-  end;
-
-  (*
-  for (int col = c1; col <= c2; col++) {
-    p = result.scanLine(r2) + col * 4;
-    for (int i = i1; i <= i2; i++)
-      rgba[i] = p[i] << 4;
-
-    p -= bpl;
-    for (int j = r1; j < r2; j++, p -= bpl)
-      for (int i = i1; i <= i2; i++)
-	p[i] = (rgba[i] += ((p[i] << 4) - rgba[i]) * alpha / 16) >> 4;
-  }
-  *)
-  for col := c1 to c2+1 do begin
-    p := image.GetDataLineStart(r2) + col * 4;
-    for i := i1 to i2+1 do begin
-      rgba[i] := p[i] shl 4;
-    end;
-    Inc(p, -bpl);
-    for j := r1 to r2 do begin
-      for i := i1 to i2+1 do begin
-        inc(rgba[i], (((p[i] shl 4) - rgba[i]) * alpha div 16) shr 4);
-        p[i] := rgba[i];
-      end;
-      Inc(p, -bpl);
-    end;
-  end;
-
-  (*
-  for (int row = r1; row <= r2; row++) {
-    p = result.scanLine(row) + c2 * 4;
-    for (int i = i1; i <= i2; i++)
-      rgba[i] = p[i] << 4;
-
-    p -= 4;
-    for (int j = c1; j < c2; j++, p -= 4)
-      for (int i = i1; i <= i2; i++)
-  	p[i] = (rgba[i] += ((p[i] << 4) - rgba[i]) * alpha / 16) >> 4;
-  }
-  *)
-  for row := r1 to r2+1 do begin
-    p := image.GetDataLineStart(row) + c2 * 4;
-    for i := i1 to i2+1 do begin
-      rgba[i] := p[i] shl 4;
-    end;
-
-    inc(p, -4);
-    for j := c1 to c2 do begin
-      for i := i1 to i2+1 do begin
-        inc(rgba[i], (((p[i] shl 4) - rgba[i]) * alpha div 16) shr 4);
-        p[i] := rgba[i];
-      end;
-      inc(p, -4);
-    end;
-  end;
-  {$ENDIF}
-
-  bitmap.LoadFromIntfImage(image);
-  image.Free;
-
 end;
 
 end.

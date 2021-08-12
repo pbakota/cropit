@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 421
+  Left = 2375
   Height = 498
-  Top = 213
+  Top = 236
   Width = 1025
   Caption = 'MainForm'
   ClientHeight = 498
@@ -11,8 +11,8 @@ object MainForm: TMainForm
   LCLVersion = '2.0.12.0'
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 23
-    Top = 475
+    Height = 20
+    Top = 478
     Width = 1025
     Panels = <>
   end
@@ -120,8 +120,7 @@ object MainForm: TMainForm
       Height = 23
       Top = 2
       Width = 23
-      Action = EditCopy1
-      GroupIndex = 1
+      Action = EditCopy
       ShowCaption = False
     end
     object SpeedButton9: TSpeedButton
@@ -129,7 +128,7 @@ object MainForm: TMainForm
       Height = 23
       Top = 2
       Width = 23
-      Action = EditPaste1
+      Action = EditPaste
       ShowCaption = False
     end
     object ToolButton4: TToolButton
@@ -145,6 +144,7 @@ object MainForm: TMainForm
       Top = 2
       Width = 23
       Action = DrawingSelect
+      GroupIndex = 1
       ShowCaption = False
     end
     object SpeedButton11: TSpeedButton
@@ -161,6 +161,7 @@ object MainForm: TMainForm
       Top = 2
       Width = 23
       Action = DrawingArrow
+      GroupIndex = 1
       ShowCaption = False
     end
     object SpeedButton13: TSpeedButton
@@ -169,6 +170,7 @@ object MainForm: TMainForm
       Top = 2
       Width = 23
       Action = DrawingText
+      GroupIndex = 1
       ShowCaption = False
     end
     object Label1: TLabel
@@ -209,7 +211,7 @@ object MainForm: TMainForm
     end
     object FFontSize: TSpinEdit
       Left = 756
-      Height = 23
+      Height = 26
       Top = 2
       Width = 50
       AutoSelect = False
@@ -223,7 +225,7 @@ object MainForm: TMainForm
       Height = 23
       Top = 2
       Width = 23
-      Action = EditUndo1
+      Action = EditUndo
       ShowCaption = False
     end
     object ToolButton6: TToolButton
@@ -252,14 +254,14 @@ object MainForm: TMainForm
   end
   object ScrollBox1: TScrollBox
     Left = 0
-    Height = 449
+    Height = 452
     Top = 26
     Width = 1025
     HorzScrollBar.Page = 735
     VertScrollBar.Page = 431
     Align = alClient
-    ClientHeight = 445
-    ClientWidth = 1021
+    ClientHeight = 450
+    ClientWidth = 1023
     TabOrder = 2
     OnPaint = ScrollBox1Paint
     object PaintBox1: TPaintBox
@@ -956,31 +958,6 @@ object MainForm: TMainForm
       Hint = 'Text'
       ImageIndex = 13
     end
-    object EditUndo1: TEditUndo
-      Category = 'Edit'
-      Caption = '&Undo'
-      DisableIfNoHandler = False
-      Hint = 'Undo'
-      ImageIndex = 14
-      OnExecute = EditUndo1Execute
-      ShortCut = 16474
-    end
-    object EditCopy1: TEditCopy
-      Category = 'Edit'
-      Caption = '&Copy'
-      DisableIfNoHandler = False
-      Hint = 'Copy'
-      ImageIndex = 8
-      ShortCut = 16451
-    end
-    object EditPaste1: TEditPaste
-      Category = 'Edit'
-      Caption = '&Paste'
-      DisableIfNoHandler = False
-      Hint = 'Paste'
-      ImageIndex = 9
-      ShortCut = 16470
-    end
     object ToolErase: TAction
       Category = 'Tool'
       Caption = 'ToolErase'
@@ -996,6 +973,25 @@ object MainForm: TMainForm
       Hint = 'Crop'
       ImageIndex = 17
       OnExecute = ToolCropExecute
+    end
+    object EditUndo: TAction
+      Category = 'Edit'
+      Caption = 'EditUndo'
+      ImageIndex = 14
+      OnExecute = EditUndoExecute
+      ShortCut = 16474
+    end
+    object EditCopy: TAction
+      Category = 'Edit'
+      Caption = 'EditCopy'
+      ImageIndex = 8
+      ShortCut = 16451
+    end
+    object EditPaste: TAction
+      Category = 'Edit'
+      Caption = 'EditPaste'
+      ImageIndex = 9
+      ShortCut = 16470
     end
   end
   object ColorDialog1: TColorDialog
