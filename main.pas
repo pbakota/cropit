@@ -508,15 +508,11 @@ begin
 end;
 
 procedure TMainForm.PaintBox1Paint(Sender: TObject);
-var
-  cx, cy: Integer;
 begin
   if Assigned(FBitmap) then begin
     PaintBox1.Canvas.Draw(0,0,FBitmap);
   end;
   if Assigned(FLayer) then begin
-    cx := FLayerPos.X + FLayerOffset.X;
-    cy := FLayerPos.Y + FLayerOffset.Y;
     with PaintBox1.Canvas do begin
       Draw(FLayerPos.X,FLayerPos.Y,FLayer);
       Pen.Color := clBlack;
