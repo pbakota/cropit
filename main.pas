@@ -175,14 +175,11 @@ end;
 procedure TMainForm.FileOpen1Accept(Sender: TObject);
 var
   pic: TPicture;
-  w, h: Integer;
 begin
+  SaveUndo;
   try
     pic := TPicture.Create;
     pic.LoadFromFile(FileOpen1.Dialog.FileName);
-    FBitmap.FreeImage;
-    w := pic.Width;
-    h := pic.Height;
     FBitmap.SetSize(pic.Bitmap.Width,pic.Bitmap.Height);
     FBitmap.Canvas.Draw(0,0,pic.Bitmap);
     FixBitmap(FBitmap);
@@ -528,6 +525,7 @@ begin
       Pen.Mode := pmNotXor;
       Brush.Style := bsClear;
       Rectangle(FLayerPos.X,FLayerPos.Y,FLayerPos.X + FLayer.Width, FLayerPos.Y + FLayer.Height);
+      Pen.Mode := pmCopy;
     end;
   end;
 end;
