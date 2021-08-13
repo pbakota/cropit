@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 2375
+  Left = 352
   Height = 498
-  Top = 236
+  Top = 211
   Width = 1025
   Caption = 'MainForm'
   ClientHeight = 498
@@ -9,10 +9,11 @@ object MainForm: TMainForm
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDefault
+  LCLVersion = '2.0.12.0'
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 20
-    Top = 478
+    Height = 23
+    Top = 475
     Width = 1025
     Panels = <>
   end
@@ -122,6 +123,7 @@ object MainForm: TMainForm
       Width = 23
       Action = EditCopy
       ShowCaption = False
+      PopupMenu = MenuCopy
     end
     object SpeedButton9: TSpeedButton
       Left = 375
@@ -130,6 +132,7 @@ object MainForm: TMainForm
       Width = 23
       Action = EditPaste
       ShowCaption = False
+      PopupMenu = MenuPaste
     end
     object ToolButton4: TToolButton
       Left = 564
@@ -211,7 +214,7 @@ object MainForm: TMainForm
     end
     object FFontSize: TSpinEdit
       Left = 751
-      Height = 21
+      Height = 23
       Top = 2
       Width = 50
       AutoSelect = False
@@ -263,7 +266,7 @@ object MainForm: TMainForm
     end
     object FLineWidth: TSpinEdit
       Left = 856
-      Height = 21
+      Height = 23
       Top = 2
       Width = 50
       MinValue = 1
@@ -273,13 +276,13 @@ object MainForm: TMainForm
   end
   object ScrollBox1: TScrollBox
     Left = 0
-    Height = 452
+    Height = 449
     Top = 26
     Width = 1025
     HorzScrollBar.Page = 735
     VertScrollBar.Page = 431
     Align = alClient
-    ClientHeight = 448
+    ClientHeight = 445
     ClientWidth = 1021
     TabOrder = 2
     OnPaint = ScrollBox1Paint
@@ -295,8 +298,8 @@ object MainForm: TMainForm
     end
   end
   object ImageList1: TImageList
-    left = 252
-    top = 129
+    Left = 252
+    Top = 129
     Bitmap = {
       4C69120000001000000010000000000000000000000000000000000000000000
       0000000000008D9190FF8D918FFF8D918FFF8C908FFF8B8F8DFF898E8CFF888C
@@ -879,8 +882,8 @@ object MainForm: TMainForm
   end
   object ActionList1: TActionList
     Images = ImageList1
-    left = 337
-    top = 144
+    Left = 337
+    Top = 144
     object FileOpen1: TFileOpen
       Category = 'File'
       Caption = '&Open ...'
@@ -1020,6 +1023,16 @@ object MainForm: TMainForm
       OnExecute = EditPasteExecute
       ShortCut = 16470
     end
+    object EditCopySelection: TAction
+      Category = 'Edit'
+      Caption = 'Copy selection only'
+      OnExecute = EditCopySelectionExecute
+    end
+    object EditPasteAsLayer: TAction
+      Category = 'Edit'
+      Caption = 'Paste as layer'
+      OnExecute = EditPasteAsLayerExecute
+    end
   end
   object ColorDialog1: TColorDialog
     Color = clBlack
@@ -1045,7 +1058,21 @@ object MainForm: TMainForm
       'ColorS=F0FBFF'
       'ColorT=A4A0A0'
     )
-    left = 418
-    top = 145
+    Left = 418
+    Top = 145
+  end
+  object MenuCopy: TPopupMenu
+    Left = 510
+    Top = 111
+    object MenuItem1: TMenuItem
+      Action = EditCopySelection
+    end
+  end
+  object MenuPaste: TPopupMenu
+    Left = 601
+    Top = 111
+    object MenuItem2: TMenuItem
+      Action = EditPasteAsLayer
+    end
   end
 end

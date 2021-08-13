@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
-  Buttons, ActnList, StdActns, StdCtrls, Spin;
+  Buttons, ActnList, StdActns, StdCtrls, Spin, Menus;
 
 const
   MaxUndoDepth = 50;
@@ -20,10 +20,16 @@ type
   { TMainForm }
 
   TMainForm = class(TForm)
+    EditPasteAsLayer: TAction;
+    EditCopySelection: TAction;
     EditPaste: TAction;
     EditCopy: TAction;
     EditUndo: TAction;
     Label3: TLabel;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    MenuCopy: TPopupMenu;
+    MenuPaste: TPopupMenu;
     SpeedButton16: TSpeedButton;
     FLineWidth: TSpinEdit;
     ToolCrop: TAction;
@@ -74,6 +80,8 @@ type
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
     procedure EditCopyExecute(Sender: TObject);
+    procedure EditCopySelectionExecute(Sender: TObject);
+    procedure EditPasteAsLayerExecute(Sender: TObject);
     procedure EditPasteExecute(Sender: TObject);
     procedure EditUndoExecute(Sender: TObject);
     procedure FileNewExecute(Sender: TObject);
@@ -100,6 +108,9 @@ type
     FBlurRadius: Integer;
     FUndoStack: packed array[0..MaxUndoDepth] of TBitmap;
     FUndoIndex: Integer;
+    FLayer: TBitmap;
+    FLayerPos, FLayerOffset: TPoint;
+    FMoveLayer: Boolean;
     procedure NewBitmap;
     function GetCurDrawingTool: TDrawingTool;
     function ValidSelection: Boolean;
@@ -108,6 +119,8 @@ type
     procedure SaveUndo;
     procedure DoUndo;
     procedure CloneBitmap(var dst: TBitmap; src: TBitmap);
+    procedure PasteInto(var target: TBitmap);
+    procedure FixBitmap(var bitmap: TBitmap);
   public
 
   end;
@@ -141,6 +154,9 @@ begin
   FColorButton.ButtonColor := clRed;
   FFontSize.Value:= 24;
   FBlurRadius := 8;
+
+  FMoveLayer := False;
+
   NewBitmap;
 end;
 
@@ -151,6 +167,7 @@ end;
 
 procedure TMainForm.FileNewExecute(Sender: TObject);
 begin
+  SaveUndo;
   NewBitmap;
   PaintBox1.Repaint;
 end;
@@ -158,12 +175,17 @@ end;
 procedure TMainForm.FileOpen1Accept(Sender: TObject);
 var
   pic: TPicture;
+  w, h: Integer;
 begin
   try
     pic := TPicture.Create;
     pic.LoadFromFile(FileOpen1.Dialog.FileName);
-    FBitmap.Assign(pic.Bitmap);
-
+    FBitmap.FreeImage;
+    w := pic.Width;
+    h := pic.Height;
+    FBitmap.SetSize(pic.Bitmap.Width,pic.Bitmap.Height);
+    FBitmap.Canvas.Draw(0,0,pic.Bitmap);
+    FixBitmap(FBitmap);
     PaintBox1.Repaint;
   finally
     pic.Free;
@@ -171,8 +193,18 @@ begin
 end;
 
 procedure TMainForm.FileSaveAs1Accept(Sender: TObject);
+var
+  aPng: TPortableNetworkGraphic;
 begin
-  FBitmap.SaveToFile(FileSaveAs1.Dialog.FileName);
+  try
+    aPng := TPortableNetworkGraphic.Create;
+    aPng.PixelFormat := pf24bit;
+    aPng.Assign(FBitmap);
+    aPng.Transparent := False;
+    aPng.SaveToFile(FileSaveAs1.Dialog.FileName);
+  finally
+    aPng.Free;
+  end;
 end;
 
 procedure TMainForm.EditCopyExecute(Sender: TObject);
@@ -180,7 +212,48 @@ begin
   Clipboard.Assign(FBitmap);
 end;
 
+procedure TMainForm.EditCopySelectionExecute(Sender: TObject);
+var
+  temp: TBitmap;
+  w, h: Integer;
+begin
+  if not ValidSelection then Exit;
+
+  w := Abs(FSelection.Width);
+  h := Abs(FSelection.Height);
+  try
+    temp := TBitmap.Create;
+    temp.PixelFormat:=pf32bit;
+    temp.SetSize(w,h);
+    temp.Canvas.CopyRect(Rect(0,0,w,h), FBitmap.Canvas, FSelection);
+    Clipboard.Assign(temp);
+  finally
+    temp.Free;
+  end;
+end;
+
+procedure TMainForm.EditPasteAsLayerExecute(Sender: TObject);
+begin
+  if Assigned(FLayer) then FLayer.Free;
+  FLayer := TBitmap.Create;
+  FLayer.PixelFormat:=pf32bit;
+
+  PasteInto(FLayer);
+  FLayerPos.X := (FBitmap.Width - FLayer.Width) div 2;
+  FLayerPos.Y := (FBitmap.Height - FLayer.Height) div 2;
+  FLayerOffset.X := 0;
+  FLayerOffset.Y := 0;
+
+  PaintBox1.Repaint;
+end;
+
 procedure TMainForm.EditPasteExecute(Sender: TObject);
+begin
+  PasteInto(FBitmap);
+  PaintBox1.Repaint;
+end;
+
+procedure TMainForm.PasteInto(var target: TBitmap);
 var
   tempBitmap: TBitmap;
   PictureAvailable: boolean = False;
@@ -190,20 +263,35 @@ begin
     (Clipboard.HasFormat(PredefinedClipboardFormat(pcfBitmap))) then
     PictureAvailable := True;
 
-  if PictureAvailable then
-  begin
+  if PictureAvailable then begin
     tempBitmap := TBitmap.Create;
+    tempBitmap.PixelFormat:=pf32bit;
+    tempBitmap.Transparent:=False;
 
     if Clipboard.HasFormat(PredefinedClipboardFormat(pcfPicture)) then
       tempBitmap.LoadFromClipboardFormat(PredefinedClipboardFormat(pcfPicture));
     if Clipboard.HasFormat(PredefinedClipboardFormat(pcfBitmap)) then
       tempBitmap.LoadFromClipboardFormat(PredefinedClipboardFormat(pcfBitmap));
 
-    // so we use assign, it works perfectly
-    FBitmap.Assign(tempBitmap);
-    PaintBox1.Repaint;
+    target.SetSize(tempBitmap.Width,tempBitmap.Height);
+    target.Canvas.Draw(0,0,tempBitmap);
 
+    FixBitmap(target);
     tempBitmap.Free;
+  end;
+end;
+
+(* Stupid bitmap fix for pasted images *)
+procedure TMainForm.FixBitmap(var bitmap: TBitmap);
+var
+  temp: TBitmap;
+begin
+  try
+    temp := TBitmap.Create;
+    CloneBitmap(temp, FBitmap);
+    FBitmap.Assign(temp);
+  finally
+    temp.Free;
   end;
 end;
 
@@ -217,17 +305,27 @@ begin
       FUndoStack[i].Free;
     end;
   end;
+  if Assigned(FLayer) then FLayer.Free;
 end;
 
 procedure TMainForm.PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
+
   FMouseDown := True;
   FStartPos.X := X;
   FStartPos.Y := Y;
   FSelection := Rect(0,0,0,0);
 
-  if GetCurDrawingTool = dtFreeHand then
+  if Assigned(FLayer) then begin
+    FMoveLayer := PtInRect(Rect(FLayerPos.X, FLayerPos.Y, FLayerPos.X + FLayer.Width, FLayerPos.Y + FLayer.Height), FStartPos);
+    if FMoveLayer then begin
+      FLayerOffset.X := FStartPos.X - FLayerPos.X;
+      FLayerOffset.Y := FStartPos.Y - FLayerPos.Y;
+      StatusBar1.SimpleText:=Format('lx=%d,ly=%d sx=%d, sy=%d, ox=%d,oy=%d', [FLayerPos.X, FLayerPos.Y, FStartPos.X, FStartPos.Y, FLayerOffset.X, FLayerOffset.Y]);
+    end;
+  end
+  else if GetCurDrawingTool = dtFreeHand then
     SaveUndo;
 end;
 
@@ -241,6 +339,15 @@ begin
   EndPos.Y := Y;
 
   PaintBox1.Repaint;
+
+  if Assigned(FLayer) then begin
+    if FMoveLayer then begin
+      FLayerPos.X := EndPos.X - FLayerOffset.X;
+      FLayerPos.Y := EndPos.Y - FLayerOffset.Y;
+    end;
+
+    Exit;
+  end;
 
   with PaintBox1.Canvas do begin
     Pen.Color := FColorButton.ButtonColor;
@@ -313,10 +420,24 @@ procedure TMainForm.PaintBox1MouseUp(Sender: TObject; Button: TMouseButton;
 var
   EndPos: TPoint;
   AText: string;
+  style: TTextStyle;
 begin
   FMouseDown := False;
   EndPos.X := X;
   EndPos.Y := Y;
+
+  if Assigned(FLayer) then begin
+    if not FMoveLayer then begin
+      SaveUndo;
+      FBitmap.Canvas.Draw(FLayerPos.X, FLayerPos.Y, FLayer);
+      FixBitmap(FBitmap);
+      FreeAndNil(FLayer);
+
+      PaintBox1.Repaint;
+    end;
+
+    Exit;
+  end;
 
   with FBitmap.Canvas do begin
     Pen.Color := FColorButton.ButtonColor;
@@ -364,7 +485,10 @@ begin
           Brush.Style := bsClear;
           Font.Color := FColorButton.ButtonColor;
           Font.Size := FFontSize.Value;
-          TextRect(Rect(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y), FStartPos.X, FStartPos.Y, AText);
+          style := TextStyle;
+          style.Wordbreak:=True;
+          style.SingleLine:=False;
+          TextRect(Rect(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y), FStartPos.X, FStartPos.Y, AText, style);
         end;
       end;
     end;
@@ -391,12 +515,20 @@ var
   cx, cy: Integer;
 begin
   if Assigned(FBitmap) then begin
-    //cx := (ScrollBox1.Width - FBitmap.Width) div 2;
-    //cy := (ScrollBox1.Height - FBitmap.Height) div 2;
-    cx := 0;
-    cy := 0;
-    PaintBox1.Canvas.Draw(cx,cy,FBitmap);
-    //WriteLn(DateTimeToStr(Now) + 'Repainted');
+    PaintBox1.Canvas.Draw(0,0,FBitmap);
+  end;
+  if Assigned(FLayer) then begin
+    cx := FLayerPos.X + FLayerOffset.X;
+    cy := FLayerPos.Y + FLayerOffset.Y;
+    with PaintBox1.Canvas do begin
+      Draw(FLayerPos.X,FLayerPos.Y,FLayer);
+      Pen.Color := clBlack;
+      Pen.Width := 1;
+      Pen.Style := psDashDot;
+      Pen.Mode := pmNotXor;
+      Brush.Style := bsClear;
+      Rectangle(FLayerPos.X,FLayerPos.Y,FLayerPos.X + FLayer.Width, FLayerPos.Y + FLayer.Height);
+    end;
   end;
 end;
 

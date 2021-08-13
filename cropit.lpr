@@ -13,6 +13,10 @@ uses
 {$R *.res}
 
 begin
+  {$if declared(useHeapTrace)}
+  	globalSkipIfNoLeaks := true; // supported as of debugger version 3.2.0
+  {$endIf}
+
   RequireDerivedFormResource:=True;
   Application.Scaled:=True;
   Application.Initialize;
