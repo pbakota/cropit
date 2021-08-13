@@ -6,14 +6,12 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
-  Buttons, ActnList, StdActns, StdCtrls, Spin, fgl;
+  Buttons, ActnList, StdActns, StdCtrls, Spin;
 
 const
   MaxUndoDepth = 50;
 
 type
-
-  TBitmapList = specialize TFPGObjectList<TBitmap>;
 
   { TDrawingTool }
 
@@ -25,7 +23,9 @@ type
     EditPaste: TAction;
     EditCopy: TAction;
     EditUndo: TAction;
+    Label3: TLabel;
     SpeedButton16: TSpeedButton;
+    FLineWidth: TSpinEdit;
     ToolCrop: TAction;
     SpeedButton15: TSpeedButton;
     ToolErase: TAction;
@@ -73,7 +73,12 @@ type
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
+    procedure EditCopyExecute(Sender: TObject);
+    procedure EditPasteExecute(Sender: TObject);
     procedure EditUndoExecute(Sender: TObject);
+    procedure FileNewExecute(Sender: TObject);
+    procedure FileOpen1Accept(Sender: TObject);
+    procedure FileSaveAs1Accept(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -91,7 +96,6 @@ type
     FBitmap: TBitmap;
     FMouseDown: Boolean;
     FStartPos: TPoint;
-    FPenWidth: Integer;
     FSelection: TRect;
     FBlurRadius: Integer;
     FUndoStack: packed array[0..MaxUndoDepth] of TBitmap;
@@ -114,7 +118,7 @@ var
 implementation
 
 uses
-  Math, IntfGraphics;
+  Math, Clipbrd, LCLIntf, LCLType, IntfGraphics;
 
 {$R *.lfm}
 
@@ -128,8 +132,10 @@ begin
   FileSaveAs1.Dialog.DefaultExt:='png';
   FileSaveAs1.Dialog.Options:=[ofOverwritePrompt, ofPathMustExist, ofAutoPreview, ofViewDetail];
 
+  Caption := 'CropIt!';
+
   FUndoIndex := 0; // Empty stack
-  FPenWidth := 3;
+  FLineWidth.Value := 3;
   SpeedButton4.Down := True;
   DrawingFreehand.Checked:= True;
   FColorButton.ButtonColor := clRed;
@@ -141,6 +147,64 @@ end;
 procedure TMainForm.EditUndoExecute(Sender: TObject);
 begin
   DoUndo;
+end;
+
+procedure TMainForm.FileNewExecute(Sender: TObject);
+begin
+  NewBitmap;
+  PaintBox1.Repaint;
+end;
+
+procedure TMainForm.FileOpen1Accept(Sender: TObject);
+var
+  pic: TPicture;
+begin
+  try
+    pic := TPicture.Create;
+    pic.LoadFromFile(FileOpen1.Dialog.FileName);
+    FBitmap.Assign(pic.Bitmap);
+
+    PaintBox1.Repaint;
+  finally
+    pic.Free;
+  end;
+end;
+
+procedure TMainForm.FileSaveAs1Accept(Sender: TObject);
+begin
+  FBitmap.SaveToFile(FileSaveAs1.Dialog.FileName);
+end;
+
+procedure TMainForm.EditCopyExecute(Sender: TObject);
+begin
+  Clipboard.Assign(FBitmap);
+end;
+
+procedure TMainForm.EditPasteExecute(Sender: TObject);
+var
+  tempBitmap: TBitmap;
+  PictureAvailable: boolean = False;
+begin
+  // we determine if any image is on clipboard
+  if (Clipboard.HasFormat(PredefinedClipboardFormat(pcfPicture))) or
+    (Clipboard.HasFormat(PredefinedClipboardFormat(pcfBitmap))) then
+    PictureAvailable := True;
+
+  if PictureAvailable then
+  begin
+    tempBitmap := TBitmap.Create;
+
+    if Clipboard.HasFormat(PredefinedClipboardFormat(pcfPicture)) then
+      tempBitmap.LoadFromClipboardFormat(PredefinedClipboardFormat(pcfPicture));
+    if Clipboard.HasFormat(PredefinedClipboardFormat(pcfBitmap)) then
+      tempBitmap.LoadFromClipboardFormat(PredefinedClipboardFormat(pcfBitmap));
+
+    // so we use assign, it works perfectly
+    FBitmap.Assign(tempBitmap);
+    PaintBox1.Repaint;
+
+    tempBitmap.Free;
+  end;
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
@@ -180,13 +244,13 @@ begin
 
   with PaintBox1.Canvas do begin
     Pen.Color := FColorButton.ButtonColor;
-    Pen.Width := FPenWidth;
+    Pen.Width := FLineWidth.Value;
     Pen.Style := psSolid;
   end;
 
   with FBitmap.Canvas do begin
     Pen.Color := FColorButton.ButtonColor;
-    Pen.Width := FPenWidth;
+    Pen.Width := FLineWidth.Value;
     Pen.Style := psSolid;
   end;
 
@@ -256,7 +320,7 @@ begin
 
   with FBitmap.Canvas do begin
     Pen.Color := FColorButton.ButtonColor;
-    Pen.Width := FPenWidth;
+    Pen.Width := FLineWidth.Value;
     Pen.Style := psSolid;
   end;
 

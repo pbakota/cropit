@@ -8,11 +8,11 @@ object MainForm: TMainForm
   ClientWidth = 1025
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '2.0.12.0'
+  Position = poDefault
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 22
-    Top = 476
+    Height = 20
+    Top = 478
     Width = 1025
     Panels = <>
   end
@@ -177,24 +177,24 @@ object MainForm: TMainForm
       Left = 643
       Height = 23
       Top = 2
-      Width = 34
+      Width = 29
       AutoSize = False
       Caption = 'Color:'
       Layout = tlCenter
       ParentColor = False
     end
     object Label2: TLabel
-      Left = 706
+      Left = 701
       Height = 23
       Top = 2
       Width = 50
       AutoSize = False
-      Caption = 'Font size:'
+      Caption = ' Font size:'
       Layout = tlCenter
       ParentColor = False
     end
     object FColorButton: TColorButton
-      Left = 677
+      Left = 672
       Height = 23
       Top = 2
       Width = 29
@@ -210,8 +210,8 @@ object MainForm: TMainForm
       Style = tbsDivider
     end
     object FFontSize: TSpinEdit
-      Left = 756
-      Height = 24
+      Left = 751
+      Height = 21
       Top = 2
       Width = 50
       AutoSelect = False
@@ -251,17 +251,36 @@ object MainForm: TMainForm
       Action = ToolCrop
       ShowCaption = False
     end
+    object Label3: TLabel
+      Left = 801
+      Height = 23
+      Top = 2
+      Width = 55
+      AutoSize = False
+      Caption = ' Line width:'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object FLineWidth: TSpinEdit
+      Left = 856
+      Height = 21
+      Top = 2
+      Width = 50
+      MinValue = 1
+      TabOrder = 2
+      Value = 1
+    end
   end
   object ScrollBox1: TScrollBox
     Left = 0
-    Height = 450
+    Height = 452
     Top = 26
     Width = 1025
     HorzScrollBar.Page = 735
     VertScrollBar.Page = 431
     Align = alClient
     ClientHeight = 448
-    ClientWidth = 1023
+    ClientWidth = 1021
     TabOrder = 2
     OnPaint = ScrollBox1Paint
     object PaintBox1: TPaintBox
@@ -276,8 +295,8 @@ object MainForm: TMainForm
     end
   end
   object ImageList1: TImageList
-    Left = 252
-    Top = 129
+    left = 252
+    top = 129
     Bitmap = {
       4C69120000001000000010000000000000000000000000000000000000000000
       0000000000008D9190FF8D918FFF8D918FFF8C908FFF8B8F8DFF898E8CFF888C
@@ -860,20 +879,22 @@ object MainForm: TMainForm
   end
   object ActionList1: TActionList
     Images = ImageList1
-    Left = 337
-    Top = 144
+    left = 337
+    top = 144
     object FileOpen1: TFileOpen
       Category = 'File'
       Caption = '&Open ...'
       Hint = 'Open'
       ImageIndex = 0
       ShortCut = 16463
+      OnAccept = FileOpen1Accept
     end
     object FileSaveAs1: TFileSaveAs
       Category = 'File'
       Caption = 'Save &As ...'
       Hint = 'Save As'
       ImageIndex = 1
+      OnAccept = FileSaveAs1Accept
     end
     object FileExit1: TFileExit
       Category = 'File'
@@ -886,6 +907,7 @@ object MainForm: TMainForm
       Caption = '&New'
       DisableIfNoHandler = False
       ImageIndex = 3
+      OnExecute = FileNewExecute
     end
     object DrawingFreehand: TAction
       Category = 'Drawing'
@@ -977,6 +999,7 @@ object MainForm: TMainForm
     object EditUndo: TAction
       Category = 'Edit'
       Caption = 'EditUndo'
+      Hint = 'Undo'
       ImageIndex = 14
       OnExecute = EditUndoExecute
       ShortCut = 16474
@@ -984,13 +1007,17 @@ object MainForm: TMainForm
     object EditCopy: TAction
       Category = 'Edit'
       Caption = 'EditCopy'
+      Hint = 'Copy'
       ImageIndex = 8
+      OnExecute = EditCopyExecute
       ShortCut = 16451
     end
     object EditPaste: TAction
       Category = 'Edit'
       Caption = 'EditPaste'
+      Hint = 'Paste'
       ImageIndex = 9
+      OnExecute = EditPasteExecute
       ShortCut = 16470
     end
   end
@@ -1018,7 +1045,7 @@ object MainForm: TMainForm
       'ColorS=F0FBFF'
       'ColorT=A4A0A0'
     )
-    Left = 418
-    Top = 145
+    left = 418
+    top = 145
   end
 end
