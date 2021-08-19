@@ -2,10 +2,10 @@ object MainForm: TMainForm
   Left = 352
   Height = 498
   Top = 211
-  Width = 1025
+  Width = 951
   Caption = 'MainForm'
   ClientHeight = 498
-  ClientWidth = 1025
+  ClientWidth = 951
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDefault
@@ -14,14 +14,14 @@ object MainForm: TMainForm
     Left = 0
     Height = 23
     Top = 475
-    Width = 1025
+    Width = 951
     Panels = <>
   end
   object ToolBar1: TToolBar
     Left = 0
     Height = 26
     Top = 0
-    Width = 1025
+    Width = 951
     ButtonHeight = 23
     ButtonWidth = 23
     Caption = 'ToolBar1'
@@ -73,16 +73,17 @@ object MainForm: TMainForm
       Caption = 'ToolButton2'
       Style = tbsDivider
     end
-    object SpeedButton4: TSpeedButton
+    object rbDrawFreehand: TSpeedButton
       Left = 403
       Height = 23
       Top = 2
       Width = 23
       Action = DrawingFreehand
+      Down = True
       GroupIndex = 1
       ShowCaption = False
     end
-    object SpeedButton5: TSpeedButton
+    object rbDrawLine: TSpeedButton
       Left = 426
       Height = 23
       Top = 2
@@ -91,7 +92,7 @@ object MainForm: TMainForm
       GroupIndex = 1
       ShowCaption = False
     end
-    object SpeedButton6: TSpeedButton
+    object rbDrawRect: TSpeedButton
       Left = 472
       Height = 23
       Top = 2
@@ -100,7 +101,7 @@ object MainForm: TMainForm
       GroupIndex = 1
       ShowCaption = False
     end
-    object SpeedButton7: TSpeedButton
+    object rbDrawEllipse: TSpeedButton
       Left = 449
       Height = 23
       Top = 2
@@ -141,7 +142,7 @@ object MainForm: TMainForm
       Caption = 'ToolButton4'
       Style = tbsDivider
     end
-    object SpeedButton10: TSpeedButton
+    object rbDrawSelect: TSpeedButton
       Left = 541
       Height = 23
       Top = 2
@@ -158,7 +159,7 @@ object MainForm: TMainForm
       Action = ToolBlur
       ShowCaption = False
     end
-    object SpeedButton12: TSpeedButton
+    object rbDrawArrow: TSpeedButton
       Left = 495
       Height = 23
       Top = 2
@@ -167,7 +168,7 @@ object MainForm: TMainForm
       GroupIndex = 1
       ShowCaption = False
     end
-    object SpeedButton13: TSpeedButton
+    object rbDrawText: TSpeedButton
       Left = 518
       Height = 23
       Top = 2
@@ -180,24 +181,24 @@ object MainForm: TMainForm
       Left = 643
       Height = 23
       Top = 2
-      Width = 29
+      Width = 37
       AutoSize = False
       Caption = 'Color:'
       Layout = tlCenter
       ParentColor = False
     end
     object Label2: TLabel
-      Left = 701
+      Left = 709
       Height = 23
       Top = 2
-      Width = 50
+      Width = 59
       AutoSize = False
       Caption = ' Font size:'
       Layout = tlCenter
       ParentColor = False
     end
     object FColorButton: TColorButton
-      Left = 672
+      Left = 680
       Height = 23
       Top = 2
       Width = 29
@@ -213,7 +214,7 @@ object MainForm: TMainForm
       Style = tbsDivider
     end
     object FFontSize: TSpinEdit
-      Left = 751
+      Left = 768
       Height = 23
       Top = 2
       Width = 50
@@ -255,20 +256,20 @@ object MainForm: TMainForm
       ShowCaption = False
     end
     object Label3: TLabel
-      Left = 801
+      Left = 818
       Height = 23
       Top = 2
-      Width = 55
+      Width = 70
       AutoSize = False
-      Caption = ' Line width:'
+      Caption = ' Line width:  '
       Layout = tlCenter
       ParentColor = False
     end
     object FLineWidth: TSpinEdit
-      Left = 856
+      Left = 888
       Height = 23
       Top = 2
-      Width = 50
+      Width = 42
       MinValue = 1
       TabOrder = 2
       Value = 1
@@ -278,12 +279,12 @@ object MainForm: TMainForm
     Left = 0
     Height = 449
     Top = 26
-    Width = 1025
+    Width = 951
     HorzScrollBar.Page = 735
     VertScrollBar.Page = 431
     Align = alClient
     ClientHeight = 445
-    ClientWidth = 1021
+    ClientWidth = 947
     TabOrder = 2
     OnPaint = ScrollBox1Paint
     object PaintBox1: TPaintBox
@@ -914,7 +915,6 @@ object MainForm: TMainForm
     end
     object DrawingFreehand: TAction
       Category = 'Drawing'
-      AutoCheck = True
       Caption = 'Action1'
       DisableIfNoHandler = False
       GroupIndex = 1
@@ -923,7 +923,6 @@ object MainForm: TMainForm
     end
     object DrawingLine: TAction
       Category = 'Drawing'
-      AutoCheck = True
       Caption = 'DrawingLine'
       DisableIfNoHandler = False
       GroupIndex = 1
@@ -932,7 +931,6 @@ object MainForm: TMainForm
     end
     object DrawingEllipse: TAction
       Category = 'Drawing'
-      AutoCheck = True
       Caption = 'DrawingEllipse'
       DisableIfNoHandler = False
       GroupIndex = 1
@@ -941,7 +939,6 @@ object MainForm: TMainForm
     end
     object DrawingRectangle: TAction
       Category = 'Drawing'
-      AutoCheck = True
       Caption = 'DrawingRectangle'
       DisableIfNoHandler = False
       GroupIndex = 1
@@ -950,7 +947,6 @@ object MainForm: TMainForm
     end
     object DrawingSelect: TAction
       Category = 'Drawing'
-      AutoCheck = True
       Caption = 'DrawingSelect'
       DisableIfNoHandler = False
       GroupIndex = 1
@@ -967,7 +963,6 @@ object MainForm: TMainForm
     end
     object DrawingArrow: TAction
       Category = 'Drawing'
-      AutoCheck = True
       Caption = 'DrawingArrow'
       DisableIfNoHandler = False
       GroupIndex = 1
@@ -976,7 +971,6 @@ object MainForm: TMainForm
     end
     object DrawingText: TAction
       Category = 'Drawing'
-      AutoCheck = True
       Caption = 'DrawingText'
       DisableIfNoHandler = False
       GroupIndex = 1
@@ -1033,33 +1027,6 @@ object MainForm: TMainForm
       Caption = 'Paste as layer'
       OnExecute = EditPasteAsLayerExecute
     end
-  end
-  object ColorDialog1: TColorDialog
-    Color = clBlack
-    CustomColors.Strings = (
-      'ColorA=000000'
-      'ColorB=000080'
-      'ColorC=008000'
-      'ColorD=008080'
-      'ColorE=800000'
-      'ColorF=800080'
-      'ColorG=808000'
-      'ColorH=808080'
-      'ColorI=C0C0C0'
-      'ColorJ=0000FF'
-      'ColorK=00FF00'
-      'ColorL=00FFFF'
-      'ColorM=FF0000'
-      'ColorN=FF00FF'
-      'ColorO=FFFF00'
-      'ColorP=FFFFFF'
-      'ColorQ=C0DCC0'
-      'ColorR=F0CAA6'
-      'ColorS=F0FBFF'
-      'ColorT=A4A0A0'
-    )
-    Left = 418
-    Top = 145
   end
   object MenuCopy: TPopupMenu
     Left = 510

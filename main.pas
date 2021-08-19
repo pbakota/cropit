@@ -36,13 +36,12 @@ type
     SpeedButton15: TSpeedButton;
     ToolErase: TAction;
     FColorButton: TColorButton;
-    ColorDialog1: TColorDialog;
     DrawingText: TAction;
     DrawingArrow: TAction;
     Label1: TLabel;
     Label2: TLabel;
-    SpeedButton12: TSpeedButton;
-    SpeedButton13: TSpeedButton;
+    rbDrawArrow: TSpeedButton;
+    rbDrawText: TSpeedButton;
     FFontSize: TSpinEdit;
     SpeedButton14: TSpeedButton;
     ToolBlur: TAction;
@@ -63,14 +62,14 @@ type
     PaintBox1: TPaintBox;
     ScrollBox1: TScrollBox;
     SpeedButton1: TSpeedButton;
-    SpeedButton10: TSpeedButton;
+    rbDrawSelect: TSpeedButton;
     SpeedButton11: TSpeedButton;
     SpeedButton2: TSpeedButton;
     SpeedButton3: TSpeedButton;
-    SpeedButton4: TSpeedButton;
-    SpeedButton5: TSpeedButton;
-    SpeedButton6: TSpeedButton;
-    SpeedButton7: TSpeedButton;
+    rbDrawFreehand: TSpeedButton;
+    rbDrawLine: TSpeedButton;
+    rbDrawRect: TSpeedButton;
+    rbDrawEllipse: TSpeedButton;
     SpeedButton8: TSpeedButton;
     SpeedButton9: TSpeedButton;
     StatusBar1: TStatusBar;
@@ -149,7 +148,7 @@ begin
 
   FUndoIndex := 0; // Empty stack
   FLineWidth.Value := 3;
-  SpeedButton4.Down := True;
+  rbDrawFreehand.Down := True;
   DrawingFreehand.Checked:= True;
   FColorButton.ButtonColor := clRed;
   FFontSize.Value:= 24;
@@ -247,6 +246,16 @@ end;
 procedure TMainForm.EditPasteExecute(Sender: TObject);
 begin
   PasteInto(FBitmap);
+  PaintBox1.Width := FBitmap.Width;
+  PaintBox1.Height := FBitmap.Height;
+
+  StatusBar1.SimpleText:=Format('Pasted image: w:=%d, h=%d, bpp=%d, transparent=%d', [
+    FBitmap.Width,
+    FBitmap.Height,
+    Integer(PIXELFORMAT_BPP[FBitmap.PixelFormat]),
+    Integer(FBitmap.Transparent)
+  ]);
+
   PaintBox1.Repaint;
 end;
 
@@ -272,6 +281,7 @@ begin
 
     target.SetSize(tempBitmap.Width,tempBitmap.Height);
     target.Canvas.Draw(0,0,tempBitmap);
+    //target.Assign(tempBitmap);
 
     FixBitmap(target);
     tempBitmap.Free;
@@ -610,8 +620,8 @@ begin
     Pen.Color := clBlack;
     FillRect(FBitmap.Canvas.ClipRect);
   end;
-  PaintBox1.Width := 800;
-  PaintBox1.Height := 600;
+  PaintBox1.Width := FBitmap.Width;
+  PaintBox1.Height := FBitmap.Height;
 end;
 
 procedure TMainForm.ClearSelection;
@@ -645,24 +655,31 @@ begin
   CloneBitmap(FBitmap, tmp);
   tmp.Free;
 
+  PaintBox1.Width := FBitmap.Width;
+  PaintBox1.Height := FBitmap.Height;
   PaintBox1.Repaint;
 end;
 
 procedure TMainForm.CloneBitmap(var dst: TBitmap; src: TBitmap);
 begin
   dst.SetSize(src.Width, src.Height);
+  // There is some funny bug in Lazarus, when we paste image and start to draw on it,
+  // the default pen will be "transparent" that means it starts to draw by erasing the image
+  // partially and the backdrop pattern will be visible.
+  // With this hack. Everything will return to normal. :)
   dst.Canvas.CopyRect(Rect(0,0,src.Width,src.Height), src.Canvas, Rect(0,0,src.Width,src.Height));
 end;
 
 function TMainForm.GetCurDrawingTool: TDrawingTool;
 begin
-  if DrawingFreeHand.Checked then Result := dtFreeHand else
-  if DrawingLine.Checked then Result := dtLine else
-  if DrawingEllipse.Checked then Result := dtEllipse else
-  if DrawingArrow.Checked then Result := dtArrow else
-  if DrawingText.Checked then Result := dtText else
-  if DrawingSelect.Checked then Result := dtSelect else
-  if DrawingRectangle.Checked then Result := dtRect;
+  if rbDrawFreehand.Down then Result := dtFreeHand else
+  if rbDrawLine.Down then Result := dtLine else
+  if rbDrawEllipse.Down then Result := dtEllipse else
+  if rbDrawArrow.Down then Result := dtArrow else
+  if rbDrawText.Down then Result := dtText else
+  if rbDrawSelect.Down then Result := dtSelect else
+  if rbDrawRect.Down then Result := dtRect else
+     raise EInvalidArgument.Create('Invalid tool');
 end;
 
 function TMainForm.ValidSelection: Boolean;
