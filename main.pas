@@ -415,7 +415,9 @@ begin
         Pen.Style := psDashDot;
         Pen.Width := 1;
         Pen.Color := clBlack;
+        Pen.Mode := pmNotXor;
         Rectangle(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
+        Pen.Mode := pmCopy;
       end;
       StatusBar1.SimpleText := Format('Selection: %dx%d', [Abs(EndPos.X-FStartPos.X), Abs(EndPos.Y-FStartPos.Y)]);
     end;
@@ -511,8 +513,10 @@ begin
       Brush.Style := bsClear;
       Pen.Style := psDashDot;
       Pen.Width := 1;
+      Pen.Mode := pmNotXor;
       Pen.Color := clBlack;
       Rectangle(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
+      Pen.Mode := pmCopy;
     end;
   end;
 end;
@@ -593,6 +597,9 @@ begin
   FBitmap := temp;
 
   ClearSelection;
+
+  PaintBox1.Width := FBitmap.Width;
+  PaintBox1.Height := FBitmap.Height;
   PaintBox1.Repaint;
 end;
 
