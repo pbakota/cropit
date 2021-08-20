@@ -554,6 +554,8 @@ begin
       end;
     end;
   end;
+  PaintBox1.Left := Max((ScrollBox1.Width - PaintBox1.Width) div 2, 0);
+  PaintBox1.Top := Max((ScrollBox1.Height - PaintBox1.Height) div 2, 0);
 end;
 
 procedure TMainForm.ToolBlurExecute(Sender: TObject);
