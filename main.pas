@@ -110,7 +110,7 @@ type
     FLayer: TBitmap;
     FLayerPos, FLayerOffset: TPoint;
     FMoveLayer: Boolean;
-    procedure NewBitmap;
+    procedure NewBitmap(nw, nh: Integer);
     function GetCurDrawingTool: TDrawingTool;
     function ValidSelection: Boolean;
     procedure DrawArrow(ACanvas: TCanvas; X1,Y1,X2,Y2: Integer);
@@ -130,7 +130,7 @@ var
 implementation
 
 uses
-  Math, Clipbrd, LCLIntf, LCLType, IntfGraphics;
+  Math, Clipbrd, LCLIntf, LCLType, IntfGraphics, PageSize;
 
 {$R *.lfm}
 
@@ -156,7 +156,7 @@ begin
 
   FMoveLayer := False;
 
-  NewBitmap;
+  NewBitmap(800, 600);
 end;
 
 procedure TMainForm.EditUndoExecute(Sender: TObject);
@@ -165,10 +165,16 @@ begin
 end;
 
 procedure TMainForm.FileNewExecute(Sender: TObject);
+var
+  nw, nh: Integer;
 begin
-  SaveUndo;
-  NewBitmap;
-  PaintBox1.Repaint;
+  nw := FBitmap.Width;
+  nh := FBitmap.Height;
+  if PageSizeDlg.Execute(nw, nh) then begin
+    SaveUndo;
+    NewBitmap(nw, nh);
+    PaintBox1.Repaint;
+  end;
 end;
 
 procedure TMainForm.FileOpen1Accept(Sender: TObject);
@@ -182,6 +188,17 @@ begin
     FBitmap.SetSize(pic.Bitmap.Width,pic.Bitmap.Height);
     FBitmap.Canvas.Draw(0,0,pic.Bitmap);
     FixBitmap(FBitmap);
+
+    PaintBox1.Width := FBitmap.Width;
+    PaintBox1.Height := FBitmap.Height;
+
+    StatusBar1.SimpleText:=Format('Loaded image: w:=%d, h=%d, bpp=%d, transparent=%d', [
+        FBitmap.Width,
+        FBitmap.Height,
+        Integer(PIXELFORMAT_BPP[FBitmap.PixelFormat]),
+        Integer(FBitmap.Transparent)
+      ]);
+
     PaintBox1.Repaint;
   finally
     pic.Free;
@@ -619,11 +636,11 @@ begin
   PaintBox1.Repaint;
 end;
 
-procedure TMainForm.NewBitmap;
+procedure TMainForm.NewBitmap(nw, nh: Integer);
 begin
   FBitmap := TBitmap.Create;
   FBitmap.PixelFormat:=pf32bit;
-  FBitmap.SetSize(800,600);
+  FBitmap.SetSize(nw,nh);
   with FBitmap.Canvas do begin
     Brush.Color := clWhite;
     Pen.Color := clBlack;
