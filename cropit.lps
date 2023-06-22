@@ -18,7 +18,8 @@
         <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="149"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="215"/>
         <CursorPos X="20" Y="171"/>
         <UsageCount Value="198"/>
         <Loaded Value="True"/>
@@ -45,10 +46,9 @@
         <ComponentName Value="PageSizeDlg"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="PageSize"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="40"/>
-        <CursorPos X="6" Y="54"/>
+        <CursorPos X="57" Y="53"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
