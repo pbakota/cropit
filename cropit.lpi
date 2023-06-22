@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <PathDelim Value="\"/>
     <General>
+      <Flags>
+        <CompatibilityMode Value="True"/>
+      </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
       <Title Value="cropit"/>
       <Scaled Value="True"/>
       <ResourceType Value="res"/>
@@ -37,6 +39,7 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
               <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
@@ -55,14 +58,16 @@
     </PublishOptions>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes Count="0"/>
     </RunParams>
-    <RequiredPackages Count="1">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="LCL"/>
+        <PackageName Value="LazControls"/>
       </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="4">
       <Unit0>
         <Filename Value="cropit.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -78,9 +83,18 @@
         <Filename Value="pagesize.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="PageSizeDlg"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="PageSize"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="shot.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ShotDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Shot"/>
+      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

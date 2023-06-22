@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, main, PageSize
+  Forms, lazcontrols, main, PageSize, Shot
   { you can add units after this };
 
 {$R *.res}
@@ -22,6 +22,7 @@ begin
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
   Application.CreateForm(TPageSizeDlg, PageSizeDlg);
+  Application.CreateForm(TShotDlg, ShotDlg);
   Application.Run;
 end.
 

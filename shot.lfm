@@ -1,0 +1,107 @@
+object ShotDlg: TShotDlg
+  Left = 2170
+  Height = 290
+  Top = 250
+  Width = 320
+  BorderStyle = bsDialog
+  Caption = 'Screenshot'
+  ClientHeight = 290
+  ClientWidth = 320
+  Position = poMainFormCenter
+  object Label1: TLabel
+    Left = 8
+    Height = 15
+    Top = 8
+    Width = 108
+    Caption = 'Take a screenshot'
+    ParentColor = False
+  end
+  object GroupBox1: TGroupBox
+    Left = 8
+    Height = 129
+    Top = 32
+    Width = 304
+    Caption = 'Region'
+    ClientHeight = 105
+    ClientWidth = 298
+    TabOrder = 0
+    object rbWholeScreen: TRadioButton
+      Left = 16
+      Height = 21
+      Top = 8
+      Width = 107
+      Caption = 'Whole screen'
+      Checked = True
+      TabOrder = 2
+      TabStop = True
+    end
+    object rbCurrentWindow: TRadioButton
+      Left = 16
+      Height = 21
+      Top = 40
+      Width = 149
+      Caption = 'Current window only'
+      TabOrder = 0
+    end
+    object rbArea: TRadioButton
+      Left = 16
+      Height = 21
+      Top = 72
+      Width = 205
+      Caption = 'Capture an area of the screen'
+      TabOrder = 1
+    end
+  end
+  object chkIncludeWindowTitle: TCheckBox
+    Left = 8
+    Height = 21
+    Top = 168
+    Width = 211
+    Caption = 'Include window title and frame'
+    TabOrder = 1
+  end
+  object chkIncludeMouseCursor: TCheckBox
+    Left = 8
+    Height = 21
+    Top = 192
+    Width = 155
+    Caption = 'Include mouse cursor'
+    TabOrder = 2
+  end
+  object Label2: TLabel
+    Left = 152
+    Height = 15
+    Top = 221
+    Width = 38
+    Caption = 'Delay:'
+    ParentColor = False
+  end
+  object edtDelay: TSpinEdit
+    Left = 200
+    Height = 24
+    Top = 216
+    Width = 112
+    MaxValue = 60
+    TabOrder = 3
+  end
+  object BitBtn1: TBitBtn
+    Left = 152
+    Height = 30
+    Top = 248
+    Width = 75
+    DefaultCaption = True
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 4
+  end
+  object BitBtn2: TBitBtn
+    Left = 237
+    Height = 30
+    Top = 248
+    Width = 75
+    DefaultCaption = True
+    Kind = bkOK
+    ModalResult = 1
+    TabOrder = 5
+  end
+end

@@ -15,11 +15,13 @@ type
 
   { TDrawingTool }
 
-  TDrawingTool = (dtNone, dtFreeHand, dtLine, dtEllipse, dtRect, dtArrow, dtText, dtSelect);
+  TDrawingTool = (dtNone, dtFreeHand, dtLine, dtEllipse, dtRect, dtArrow, dtText, dtSelect, dtTarget);
 
   { TMainForm }
 
   TMainForm = class(TForm)
+    ToolShot: TAction;
+    DrawingTarget: TAction;
     EditPasteAsLayer: TAction;
     EditCopySelection: TAction;
     EditPaste: TAction;
@@ -30,8 +32,11 @@ type
     MenuItem2: TMenuItem;
     MenuCopy: TPopupMenu;
     MenuPaste: TPopupMenu;
+    rbDrawTarget: TSpeedButton;
     SpeedButton16: TSpeedButton;
     FLineWidth: TSpinEdit;
+    ToolButton7: TToolButton;
+    ToolButton8: TToolButton;
     ToolCrop: TAction;
     SpeedButton15: TSpeedButton;
     ToolErase: TAction;
@@ -78,6 +83,7 @@ type
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
+    procedure DrawingTargetExecute(Sender: TObject);
     procedure EditCopyExecute(Sender: TObject);
     procedure EditCopySelectionExecute(Sender: TObject);
     procedure EditPasteAsLayerExecute(Sender: TObject);
@@ -99,8 +105,10 @@ type
     procedure ToolBlurExecute(Sender: TObject);
     procedure ToolCropExecute(Sender: TObject);
     procedure ToolEraseExecute(Sender: TObject);
+    procedure ToolShotExecute(Sender: TObject);
   private
     FBitmap: TBitmap;
+    FOverlay: TBitmap;
     FMouseDown: Boolean;
     FStartPos: TPoint;
     FSelection: TRect;
@@ -110,6 +118,7 @@ type
     FLayer: TBitmap;
     FLayerPos, FLayerOffset: TPoint;
     FMoveLayer: Boolean;
+    FTargetNumbering: Integer;
     procedure NewBitmap(nw, nh: Integer);
     function GetCurDrawingTool: TDrawingTool;
     function ValidSelection: Boolean;
@@ -120,6 +129,8 @@ type
     procedure CloneBitmap(var dst: TBitmap; src: TBitmap);
     procedure PasteInto(var target: TBitmap);
     procedure FixBitmap(var bitmap: TBitmap);
+    procedure UpdateOverlay;
+    procedure DrawTarget(ACanvas: TCanvas; X,Y: Integer);
   public
 
   end;
@@ -130,7 +141,7 @@ var
 implementation
 
 uses
-  Math, Clipbrd, LCLIntf, LCLType, IntfGraphics, PageSize;
+  Math, Clipbrd, LCLIntf, LCLType, IntfGraphics, PageSize, Shot;
 
 {$R *.lfm}
 
@@ -156,6 +167,7 @@ begin
 
   FMoveLayer := False;
 
+  FOverlay := TBitmap.Create;
   NewBitmap(800, 600);
 end;
 
@@ -225,6 +237,11 @@ begin
   Clipboard.Assign(FBitmap);
 end;
 
+procedure TMainForm.DrawingTargetExecute(Sender: TObject);
+begin
+  FTargetNumbering := 1;
+end;
+
 procedure TMainForm.EditCopySelectionExecute(Sender: TObject);
 var
   temp: TBitmap;
@@ -282,17 +299,13 @@ var
   PictureAvailable: boolean = False;
 begin
   // we determine if any image is on clipboard
-  if (Clipboard.HasFormat(PredefinedClipboardFormat(pcfPicture))) or
-    (Clipboard.HasFormat(PredefinedClipboardFormat(pcfBitmap))) then
+  if (Clipboard.HasFormat(PredefinedClipboardFormat(pcfBitmap))) then
     PictureAvailable := True;
 
   if PictureAvailable then begin
     tempBitmap := TBitmap.Create;
-    tempBitmap.PixelFormat:=pf32bit;
     tempBitmap.Transparent:=False;
 
-    if Clipboard.HasFormat(PredefinedClipboardFormat(pcfPicture)) then
-      tempBitmap.LoadFromClipboardFormat(PredefinedClipboardFormat(pcfPicture));
     if Clipboard.HasFormat(PredefinedClipboardFormat(pcfBitmap)) then
       tempBitmap.LoadFromClipboardFormat(PredefinedClipboardFormat(pcfBitmap));
 
@@ -319,6 +332,35 @@ begin
   end;
 end;
 
+procedure TMainForm.UpdateOverlay;
+begin
+  FOverlay.SetSize(FBitmap.Width, FBitmap.Height);
+  FOverlay.Canvas.Draw(0,0,FBitmap);
+end;
+
+procedure TMainForm.DrawTarget(ACanvas: TCanvas; X, Y: Integer);
+var
+  TargetSize: Integer;
+  TargetRect: TRect;
+  Style: TTextStyle;
+begin
+  with ACanvas do begin
+    Brush.Style := bsSolid;
+    Brush.Color := FColorButton.ButtonColor;
+    TargetSize := (FFontSize.Value div 2)+3;
+    TargetRect := Rect(X-TargetSize, Y-TargetSize, X + TargetSize*2, Y + TargetSize*2);
+    Ellipse(TargetRect);
+    Brush.Style := bsClear;
+    Font.Color := clWhite;
+    Font.Size := FFontSize.Value;
+    Style := TextStyle;
+    Style.Alignment:=taCenter;
+    Style.Wordbreak:=False;
+    Style.SingleLine:=True;
+    TextRect(TargetRect, X, Y-(TextHeight('0') div 3), IntToStr(FTargetNumbering), Style);
+  end;
+end;
+
 procedure TMainForm.FormDestroy(Sender: TObject);
 var
   I: Integer;
@@ -330,6 +372,7 @@ begin
     end;
   end;
   if Assigned(FLayer) then FLayer.Free;
+  FOverlay.Free;
 end;
 
 procedure TMainForm.PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -350,13 +393,16 @@ begin
     end;
   end
   else if GetCurDrawingTool = dtFreeHand then
-    SaveUndo;
+    SaveUndo
+  else
+    UpdateOverlay;
 end;
 
 procedure TMainForm.PaintBox1MouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
 var
   EndPos: TPoint;
+  style: TTextStyle;
 begin
   if not FMouseDown then Exit;
   EndPos.X := X;
@@ -373,10 +419,13 @@ begin
     Exit;
   end;
 
-  with PaintBox1.Canvas do begin
-    Pen.Color := FColorButton.ButtonColor;
-    Pen.Width := FLineWidth.Value;
-    Pen.Style := psSolid;
+  if Assigned(FOverlay) then begin
+    with FOverlay.Canvas do begin
+      Pen.Color := FColorButton.ButtonColor;
+      Pen.Width := FLineWidth.Value;
+      Pen.Style := psSolid;
+    end;
+    FOverlay.Canvas.Draw(0,0,FBitmap);
   end;
 
   with FBitmap.Canvas do begin
@@ -395,30 +444,30 @@ begin
       FStartPos := EndPos;
     end;
     dtLine: begin
-      with PaintBox1.Canvas do begin
+      with FOverlay.Canvas do begin
         Line(FStartPos, EndPos);
       end;
     end;
     dtEllipse: begin
-      with PaintBox1.Canvas do begin
+      with FOverlay.Canvas do begin
         Brush.Style := bsClear;
         Ellipse(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
       end;
     end;
     dtRect: begin
-      with PaintBox1.Canvas do begin
+      with FOverlay.Canvas do begin
         Brush.Style := bsClear;
         Rectangle(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
       end;
     end;
     dtArrow: begin
-      with PaintBox1.Canvas do begin
+      with FOverlay.Canvas do begin
         Brush.Style := bsClear;
-        DrawArrow(PaintBox1.Canvas, FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
+        DrawArrow(FOverlay.Canvas, FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
       end;
     end;
     dtText: begin
-      with PaintBox1.Canvas do begin
+      with FOverlay.Canvas do begin
         Brush.Style := bsClear;
         Pen.Style := psDashDot;
         Pen.Width := 1;
@@ -427,16 +476,18 @@ begin
       end;
     end;
     dtSelect: begin
-      with PaintBox1.Canvas do begin
+      with FOverlay.Canvas do begin
         Brush.Style := bsClear;
         Pen.Style := psDashDot;
         Pen.Width := 1;
         Pen.Color := clBlack;
-        Pen.Mode := pmNotXor;
         Rectangle(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
-        Pen.Mode := pmCopy;
       end;
       StatusBar1.SimpleText := Format('Selection: %dx%d', [Abs(EndPos.X-FStartPos.X), Abs(EndPos.Y-FStartPos.Y)]);
+    end;
+    dtTarget: begin
+      DrawTarget(FOverlay.Canvas,FStartPos.X,FStartPos.Y);
+      FStartPos := EndPos;
     end;
   end;
 end;
@@ -518,22 +569,25 @@ begin
         end;
       end;
     end;
+    dtTarget: begin
+      DrawTarget(FBitmap.Canvas,FStartPos.X,FStartPos.Y);
+      Inc(FTargetNumbering);
+    end;
   end;
   PaintBox1.Repaint;
 
   if GetCurDrawingTool = dtSelect then begin
     // Save selection
     FSelection := Rect(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
+    FSelection.NormalizeRect;
     StatusBar1.SimpleText := Format('Selection: %dx%d', [Abs(FSelection.Width), Abs(FSelection.Height)]);
     // Make selected are visible even when the mouse button is released.
-    with PaintBox1.Canvas do begin
+    with FOverlay.Canvas do begin
       Brush.Style := bsClear;
       Pen.Style := psDashDot;
       Pen.Width := 1;
-      Pen.Mode := pmNotXor;
       Pen.Color := clBlack;
       Rectangle(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
-      Pen.Mode := pmCopy;
     end;
   end;
 end;
@@ -541,7 +595,10 @@ end;
 procedure TMainForm.PaintBox1Paint(Sender: TObject);
 begin
   if Assigned(FBitmap) then begin
-    PaintBox1.Canvas.Draw(0,0,FBitmap);
+    if FMouseDown or ValidSelection then
+      PaintBox1.Canvas.Draw(0,0,FOverlay)
+    else
+      PaintBox1.Canvas.Draw(0,0,FBitmap);
   end;
   if Assigned(FLayer) then begin
     with PaintBox1.Canvas do begin
@@ -554,7 +611,7 @@ begin
       Rectangle(FLayerPos.X,FLayerPos.Y,FLayerPos.X + FLayer.Width, FLayerPos.Y + FLayer.Height);
       Pen.Mode := pmCopy;
     end;
-  end;
+  end
 end;
 
 procedure TMainForm.ScrollBox1Paint(Sender: TObject);
@@ -613,6 +670,8 @@ begin
   FBitmap.Free;
   FBitmap := temp;
 
+  UpdateOverlay;
+
   ClearSelection;
 
   PaintBox1.Width := FBitmap.Width;
@@ -636,6 +695,46 @@ begin
   PaintBox1.Repaint;
 end;
 
+procedure TMainForm.ToolShotExecute(Sender: TObject);
+var
+  Region: TShotRegion;
+  Options: TShotOptions;
+  Delay: Cardinal;
+  ScreenDC: HDC;
+  TempBitmap: TBitmap;
+  WindowHwnd: HWND;
+begin
+  if ShotDlg.Execute(Region, Options, Delay) then begin
+    if Delay <> 0 then begin
+      Sleep(Cardinal(Delay*1000));
+    end;
+    try
+      TempBitmap := TBitmap.Create;
+      case Region of
+        reScreen: begin
+          ScreenDC := GetDC(0);
+          TempBitmap.LoadFromDevice(ScreenDC);
+          NewBitmap(TempBitmap.Width, TempBitmap.Height);
+          FBitmap.Canvas.Draw(0,0,TempBitmap);
+        end;
+        reWindow: begin
+          WindowHWND := WindowFromPoint(Mouse.CursorPos);
+          ScreenDC := GetDC(WindowHWND);
+          TempBitmap.LoadFromDevice(ScreenDC);
+          NewBitmap(TempBitmap.Width, TempBitmap.Height);
+          FBitmap.Canvas.Draw(0,0,TempBitmap);
+        end;
+        reArea: begin
+
+        end;
+      end;
+    finally
+      TempBitmap.Free;
+      ReleaseDC(0, ScreenDC);
+    end;
+  end;
+end;
+
 procedure TMainForm.NewBitmap(nw, nh: Integer);
 begin
   FBitmap := TBitmap.Create;
@@ -648,6 +747,8 @@ begin
   end;
   PaintBox1.Width := FBitmap.Width;
   PaintBox1.Height := FBitmap.Height;
+
+  UpdateOverlay;
 end;
 
 procedure TMainForm.ClearSelection;
@@ -705,12 +806,13 @@ begin
   if rbDrawText.Down then Result := dtText else
   if rbDrawSelect.Down then Result := dtSelect else
   if rbDrawRect.Down then Result := dtRect else
+  if rbDrawTarget.Down then Result := dtTarget else
      raise EInvalidArgument.Create('Invalid tool');
 end;
 
 function TMainForm.ValidSelection: Boolean;
 begin
-  Result := not (Abs(FSelection.Width) = 0) or (Abs(FSelection.Height) = 0);
+  Result := not FSelection.IsEmpty;
 end;
 
 procedure TMainForm.DrawArrow(ACanvas: TCanvas; X1, Y1, X2, Y2: Integer);
