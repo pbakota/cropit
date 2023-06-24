@@ -455,6 +455,8 @@ begin
   FStartPos.Y := Y;
   FSelection := Rect(0,0,0,0);
 
+  UpdateOverlay;
+
   if Assigned(FLayer) then begin
     FMoveLayer := PtInRect(Rect(FLayerPos.X, FLayerPos.Y, FLayerPos.X + FLayer.Width, FLayerPos.Y + FLayer.Height), FStartPos);
     if FMoveLayer then begin
@@ -465,8 +467,6 @@ begin
   end
   else if GetCurDrawingTool = dtFreeHand then
     SaveUndo
-  else
-    UpdateOverlay;
 end;
 
 procedure TMainForm.PaintBox1MouseMove(Sender: TObject; Shift: TShiftState; X,
@@ -479,15 +479,6 @@ begin
   EndPos.Y := Y;
 
   PaintBox1.Repaint;
-
-  if Assigned(FLayer) then begin
-    if FMoveLayer then begin
-      FLayerPos.X := EndPos.X - FLayerOffset.X;
-      FLayerPos.Y := EndPos.Y - FLayerOffset.Y;
-    end;
-
-    Exit;
-  end;
 
   if Assigned(FOverlay) then begin
     with FOverlay.Canvas do begin
@@ -502,6 +493,15 @@ begin
     Pen.Color := FColorButton.ButtonColor;
     Pen.Width := FLineWidth.Value;
     Pen.Style := psSolid;
+  end;
+
+  if Assigned(FLayer) then begin
+    if FMoveLayer then begin
+      FLayerPos.X := EndPos.X - FLayerOffset.X;
+      FLayerPos.Y := EndPos.Y - FLayerOffset.Y;
+    end;
+
+    Exit;
   end;
 
   case GetCurDrawingTool of
@@ -538,20 +538,28 @@ begin
     end;
     dtText: begin
       with FOverlay.Canvas do begin
+        SaveHandleState;
         Brush.Style := bsClear;
-        Pen.Style := psDashDot;
+        Pen.Style := psDash;
         Pen.Width := 1;
-        Pen.Color := clBlack;
+        Pen.Color := clWhite;
+        Pen.Mode := pmXor;
         Rectangle(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
+        Pen.Mode := pmCopy;
+        RestoreHandleState;
       end;
     end;
     dtSelect: begin
       with FOverlay.Canvas do begin
+        SaveHandleState;
         Brush.Style := bsClear;
-        Pen.Style := psDashDot;
-        Pen.Width := 1;
-        Pen.Color := clBlack;
+        Pen.Style := psDash;
+        Pen.Width := 2;
+        Pen.Color := clWhite;
+        Pen.Mode := pmXor;
         Rectangle(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
+        Pen.Mode := pmCopy;
+        RestoreHandleState;
       end;
       StatusBar1.SimpleText := Format('Selection: %dx%d', [Abs(EndPos.X-FStartPos.X), Abs(EndPos.Y-FStartPos.Y)]);
     end;
@@ -591,6 +599,9 @@ begin
     Pen.Width := FLineWidth.Value;
     Pen.Style := psSolid;
   end;
+
+  if Assigned(FOverlay) then
+    FOverlay.Canvas.Draw(0,0,FBitmap);
 
   case GetCurDrawingTool of
     dtNone: begin
@@ -653,11 +664,15 @@ begin
     StatusBar1.SimpleText := Format('Selection: %dx%d', [Abs(FSelection.Width), Abs(FSelection.Height)]);
     // Make selected are visible even when the mouse button is released.
     with FOverlay.Canvas do begin
+      //SaveHandleState;
       Brush.Style := bsClear;
-      Pen.Style := psDashDot;
-      Pen.Width := 1;
-      Pen.Color := clBlack;
+      Pen.Style := psDash;
+      Pen.Width := 2;
+      Pen.Color := clWhite;
+      Pen.Mode := pmXor;
       Rectangle(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
+      Pen.Mode := pmCopy;
+      //RestoreHandleState;
     end;
   end;
 end;
