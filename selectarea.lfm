@@ -1,0 +1,31 @@
+object SelectArea: TSelectArea
+  Left = 2170
+  Height = 131
+  Top = 250
+  Width = 175
+  AlphaBlend = True
+  AlphaBlendValue = 128
+  BorderStyle = bsNone
+  Caption = 'AreaSelect'
+  ClientHeight = 131
+  ClientWidth = 175
+  OnKeyDown = FormKeyDown
+  ShowInTaskBar = stNever
+  object PaintBox1: TPaintBox
+    Left = 0
+    Height = 131
+    Top = 0
+    Width = 175
+    Align = alClient
+    OnMouseDown = PaintBox1MouseDown
+    OnMouseMove = PaintBox1MouseMove
+    OnMouseUp = PaintBox1MouseUp
+    OnPaint = PaintBox1Paint
+  end
+  object Timer1: TTimer
+    Interval = 100
+    OnTimer = Timer1Timer
+    Left = 135
+    Top = 15
+  end
+end

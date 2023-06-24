@@ -7,22 +7,31 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, lazcontrols, main, PageSize, Shot
-  { you can add units after this };
+  SysUtils, Forms, lazcontrols, main, PageSize, Shot, SelectArea;
 
 {$R *.res}
 
+procedure ShowHelp;
 begin
-  {$if declared(useHeapTrace)}
-  	globalSkipIfNoLeaks := true; // supported as of debugger version 3.2.0
-  {$endIf}
+  WriteLn(Format('Usage: %s [options]', ['cropit']));
+  WriteLn('-h/--help = This help');
+  WriteLn('-s/--shot = Take a screenshot');
+end;
+
+begin
+  if Application.HasOption('h', 'help') then begin
+    ShowHelp;
+    Halt;
+  end;
 
   RequireDerivedFormResource:=True;
   Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
-  Application.CreateForm(TPageSizeDlg, PageSizeDlg);
-  Application.CreateForm(TShotDlg, ShotDlg);
   Application.Run;
+
+  {$if declared(useHeapTrace)}
+  	globalSkipIfNoLeaks := true; // supported as of debugger version 3.2.0
+  {$endIf}
 end.
 

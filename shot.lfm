@@ -58,6 +58,7 @@ object ShotDlg: TShotDlg
     Top = 168
     Width = 211
     Caption = 'Include window title and frame'
+    Enabled = False
     TabOrder = 1
   end
   object chkIncludeMouseCursor: TCheckBox
@@ -66,14 +67,15 @@ object ShotDlg: TShotDlg
     Top = 192
     Width = 155
     Caption = 'Include mouse cursor'
+    Enabled = False
     TabOrder = 2
   end
   object Label2: TLabel
-    Left = 152
+    Left = 118
     Height = 15
     Top = 221
-    Width = 38
-    Caption = 'Delay:'
+    Width = 79
+    Caption = 'Delay (secs):'
     ParentColor = False
   end
   object edtDelay: TSpinEdit
@@ -81,6 +83,7 @@ object ShotDlg: TShotDlg
     Height = 24
     Top = 216
     Width = 112
+    EditorEnabled = False
     MaxValue = 60
     TabOrder = 3
   end

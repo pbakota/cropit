@@ -119,6 +119,7 @@ type
     FLayerPos, FLayerOffset: TPoint;
     FMoveLayer: Boolean;
     FTargetNumbering: Integer;
+    FExitOnCancel: Boolean;
     procedure NewBitmap(nw, nh: Integer);
     function GetCurDrawingTool: TDrawingTool;
     function ValidSelection: Boolean;
@@ -141,7 +142,7 @@ var
 implementation
 
 uses
-  Math, Clipbrd, LCLIntf, LCLType, IntfGraphics, PageSize, Shot;
+  Math, Clipbrd, LCLIntf, LCLType, IntfGraphics, PageSize, Shot, SelectArea;
 
 {$R *.lfm}
 
@@ -169,6 +170,90 @@ begin
 
   FOverlay := TBitmap.Create;
   NewBitmap(800, 600);
+
+  FExitOnCancel:=False;
+  if Application.HasOption('s','shot') then begin
+    FExitOnCancel := True;
+    ToolShot.Execute;
+  end
+end;
+
+procedure TMainForm.ToolShotExecute(Sender: TObject);
+var
+  Region: TShotRegion;
+  Options: TShotOptions;
+  Delay: Cardinal;
+  DC: HDC;
+  ScreenBitmap, Selection: TBitmap;
+  WindowHwnd: HWND;
+  TempCanvas: TCanvas;
+begin
+  if TShotDlg.Execute(Region, Options, Delay) then begin
+    if Delay <> 0 then begin
+      Sleep(Cardinal(Delay*1000));
+    end;
+    try
+      ScreenBitmap := TBitmap.Create;
+      case Region of
+        reScreen: begin
+          DC := GetDC(0);
+          ScreenBitmap.LoadFromDevice(DC);
+          NewBitmap(ScreenBitmap.Width, ScreenBitmap.Height);
+          FBitmap.Canvas.Draw(0,0,ScreenBitmap);
+        end;
+        reWindow: begin
+          TempCanvas := TCanvas.Create;
+          try
+            WindowHWND := GetForegroundWindow();
+            DC := GetDC(WindowHWND);
+            TempCanvas.Handle := DC;
+            ScreenBitmap.LoadFromDevice(DC);
+            NewBitmap(ScreenBitmap.Width, ScreenBitmap.Height);
+            FBitmap.Canvas.Draw(0,0,ScreenBitmap);
+          finally
+            TempCanvas.Free;
+          end;
+        end;
+        reArea: begin
+          DC := GetDC(0);
+          ScreenBitmap.LoadFromDevice(DC);
+          Selection := TBitmap.Create;
+          try
+            if TSelectArea.Execute(ScreenBitmap, Selection) then begin
+              NewBitmap(Selection.Width, Selection.Height);
+              FBitmap.Canvas.Draw(0,0,Selection);
+            end
+            else begin
+              if FExitOnCancel then
+                Halt;
+            end;
+          finally
+            Selection.Free;
+          end;
+        end;
+      end;
+    finally
+      ScreenBitmap.Free;
+      ReleaseDC(0, DC);
+    end;
+  end
+  else
+  if FExitOnCancel then
+    Halt;
+end;
+
+procedure TMainForm.FormDestroy(Sender: TObject);
+var
+  I: Integer;
+begin
+  if Assigned(FBitmap) then FBitmap.Free;
+  if FUndoIndex <> 0 then begin
+    for I:=0 to FUndoIndex-1 do begin
+      FUndoStack[i].Free;
+    end;
+  end;
+  if Assigned(FLayer) then FLayer.Free;
+  FOverlay.Free;
 end;
 
 procedure TMainForm.EditUndoExecute(Sender: TObject);
@@ -182,7 +267,7 @@ var
 begin
   nw := FBitmap.Width;
   nh := FBitmap.Height;
-  if PageSizeDlg.Execute(nw, nh) then begin
+  if TPageSizeDlg.Execute(nw, nh) then begin
     SaveUndo;
     NewBitmap(nw, nh);
     PaintBox1.Repaint;
@@ -361,20 +446,6 @@ begin
   end;
 end;
 
-procedure TMainForm.FormDestroy(Sender: TObject);
-var
-  I: Integer;
-begin
-  if Assigned(FBitmap) then FBitmap.Free;
-  if FUndoIndex <> 0 then begin
-    for I:=0 to FUndoIndex-1 do begin
-      FUndoStack[i].Free;
-    end;
-  end;
-  if Assigned(FLayer) then FLayer.Free;
-  FOverlay.Free;
-end;
-
 procedure TMainForm.PaintBox1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
@@ -402,7 +473,6 @@ procedure TMainForm.PaintBox1MouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
 var
   EndPos: TPoint;
-  style: TTextStyle;
 begin
   if not FMouseDown then Exit;
   EndPos.X := X;
@@ -620,7 +690,10 @@ const
 var
   ColorPattern: array[0..1] of TColor = (clLtGray, clWhite);
   I, J: Integer;
+  R: TRect;
+  Offset: TPoint;
 begin
+  Offset := Point(ScrollBox1.HorzScrollBar.Position, ScrollBox1.VertScrollBar.Position);
   with ScrollBox1.Canvas do begin
     Brush.Style := bsSolid;
     Pen.Style := psSolid;
@@ -628,7 +701,12 @@ begin
       for I:=0 to (Height div CheckPatternSize) do begin
           Pen.Color := ColorPattern[(I+J) and 1];
           Brush.Color := ColorPattern[(I+J) and 1];
-          FillRect(J*CheckPatternSize, I*CheckPatternSize, J*CheckPatternSize + CheckPatternSize, I*CheckPatternSize+CheckPatternSize);
+          R:=Rect(
+            J*CheckPatternSize, I*CheckPatternSize,
+            J*CheckPatternSize + CheckPatternSize, I*CheckPatternSize+CheckPatternSize
+          );
+          OffsetRect(R, Offset.X, Offset.Y);
+          FillRect(R);
       end;
     end;
   end;
@@ -695,48 +773,10 @@ begin
   PaintBox1.Repaint;
 end;
 
-procedure TMainForm.ToolShotExecute(Sender: TObject);
-var
-  Region: TShotRegion;
-  Options: TShotOptions;
-  Delay: Cardinal;
-  ScreenDC: HDC;
-  TempBitmap: TBitmap;
-  WindowHwnd: HWND;
-begin
-  if ShotDlg.Execute(Region, Options, Delay) then begin
-    if Delay <> 0 then begin
-      Sleep(Cardinal(Delay*1000));
-    end;
-    try
-      TempBitmap := TBitmap.Create;
-      case Region of
-        reScreen: begin
-          ScreenDC := GetDC(0);
-          TempBitmap.LoadFromDevice(ScreenDC);
-          NewBitmap(TempBitmap.Width, TempBitmap.Height);
-          FBitmap.Canvas.Draw(0,0,TempBitmap);
-        end;
-        reWindow: begin
-          WindowHWND := WindowFromPoint(Mouse.CursorPos);
-          ScreenDC := GetDC(WindowHWND);
-          TempBitmap.LoadFromDevice(ScreenDC);
-          NewBitmap(TempBitmap.Width, TempBitmap.Height);
-          FBitmap.Canvas.Draw(0,0,TempBitmap);
-        end;
-        reArea: begin
-
-        end;
-      end;
-    finally
-      TempBitmap.Free;
-      ReleaseDC(0, ScreenDC);
-    end;
-  end;
-end;
-
 procedure TMainForm.NewBitmap(nw, nh: Integer);
 begin
+  if Assigned(FBitmap) then FreeAndNil(FBitmap);
+
   FBitmap := TBitmap.Create;
   FBitmap.PixelFormat:=pf32bit;
   FBitmap.SetSize(nw,nh);

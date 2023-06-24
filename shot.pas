@@ -30,11 +30,8 @@ type
   private
 
   public
-    function Execute(var Region: TShotRegion; var Options: TShotOptions; var Delay: Cardinal): Boolean;
+    class function Execute(var Region: TShotRegion; var Options: TShotOptions; var Delay: Cardinal): Boolean; static;
   end;
-
-var
-  ShotDlg: TShotDlg;
 
 implementation
 
@@ -42,24 +39,33 @@ implementation
 
 { TShotDlg }
 
-function TShotDlg.Execute(var Region: TShotRegion; var Options: TShotOptions; var Delay: Cardinal): Boolean;
+class function TShotDlg.Execute(var Region: TShotRegion; var Options: TShotOptions; var Delay: Cardinal): Boolean;
+var
+  frm: TShotDlg;
 begin
-  edtDelay.Value:= 0;
-  Result := ShowModal = mrOK;
-  if Result then begin
-    Delay := edtDelay.Value;
-    Options := [];
-    if chkIncludeWindowTitle.Checked then
-      Options := Options + [opWindowTitle];
-    if chkIncludeMouseCursor.Checked then
-      Options := Options + [opMouseCursor];
-    if rbWholeScreen.Checked then
-      Region := reScreen
-    else if rbCurrentWindow.Checked then
-      Region := reWindow
-    else if rbArea.Checked then
-      Region := reArea
-  end
+  frm := TShotDlg.Create(nil);
+  try
+    with frm do begin
+      edtDelay.Value:= 0;
+      Result := ShowModal = mrOK;
+      if Result then begin
+        Delay := edtDelay.Value;
+        Options := [];
+        if chkIncludeWindowTitle.Checked then
+          Options := Options + [opWindowTitle];
+        if chkIncludeMouseCursor.Checked then
+          Options := Options + [opMouseCursor];
+        if rbWholeScreen.Checked then
+          Region := reScreen
+        else if rbCurrentWindow.Checked then
+          Region := reWindow
+        else if rbArea.Checked then
+          Region := reArea
+      end
+    end;
+  finally
+    frm.Free;
+  end;
 end;
 
 end.
