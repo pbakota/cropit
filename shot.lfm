@@ -92,6 +92,7 @@ object ShotDlg: TShotDlg
     Height = 30
     Top = 248
     Width = 75
+    Cancel = True
     DefaultCaption = True
     Kind = bkCancel
     ModalResult = 2
