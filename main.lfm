@@ -1,0 +1,662 @@
+object MainForm: TMainForm
+  Left = 352
+  Height = 498
+  Top = 211
+  Width = 1019
+  Caption = 'MainForm'
+  ClientHeight = 498
+  ClientWidth = 1019
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poDefault
+  object StatusBar1: TStatusBar
+    Left = 0
+    Height = 22
+    Top = 476
+    Width = 1019
+    Panels = <>
+  end
+  object ToolBar1: TToolBar
+    Left = 0
+    Height = 26
+    Top = 0
+    Width = 1019
+    ButtonHeight = 23
+    ButtonWidth = 23
+    Caption = 'ToolBar1'
+    Flat = False
+    Images = ImageList1
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 1
+    object SpeedButton1: TSpeedButton
+      Left = 76
+      Height = 23
+      Top = 2
+      Width = 79
+      Action = FileOpen1
+      Images = ImageList1
+      ImageIndex = 0
+    end
+    object SpeedButton2: TSpeedButton
+      Left = 155
+      Height = 23
+      Top = 2
+      Width = 85
+      Action = FileSaveAs1
+      Images = ImageList1
+      ImageIndex = 1
+    end
+    object SpeedButton3: TSpeedButton
+      Left = 245
+      Height = 23
+      Top = 2
+      Width = 74
+      Action = FileExit1
+      Images = ImageList1
+      ImageIndex = 2
+    end
+    object ToolButton1: TToolButton
+      Left = 240
+      Height = 23
+      Top = 2
+      Caption = 'ToolButton1'
+      Style = tbsDivider
+    end
+    object BitBtn1: TBitBtn
+      Left = 1
+      Height = 23
+      Top = 2
+      Width = 75
+      Action = FileNew
+      Images = ImageList1
+      ImageIndex = 3
+      TabOrder = 0
+    end
+    object ToolButton2: TToolButton
+      Left = 429
+      Height = 23
+      Top = 2
+      Caption = 'ToolButton2'
+      Style = tbsDivider
+    end
+    object rbDrawFreehand: TSpeedButton
+      Left = 434
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = DrawingFreehand
+      Down = True
+      GroupIndex = 1
+      Images = ImageList1
+      ImageIndex = 4
+      ShowCaption = False
+    end
+    object rbDrawLine: TSpeedButton
+      Left = 457
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = DrawingLine
+      GroupIndex = 1
+      Images = ImageList1
+      ImageIndex = 5
+      ShowCaption = False
+    end
+    object rbDrawRect: TSpeedButton
+      Left = 503
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = DrawingRectangle
+      GroupIndex = 1
+      Images = ImageList1
+      ImageIndex = 7
+      ShowCaption = False
+    end
+    object rbDrawEllipse: TSpeedButton
+      Left = 480
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = DrawingEllipse
+      GroupIndex = 1
+      Images = ImageList1
+      ImageIndex = 6
+      ShowCaption = False
+    end
+    object ToolButton3: TToolButton
+      Left = 378
+      Height = 23
+      Top = 2
+      Caption = 'ToolButton3'
+      Style = tbsDivider
+    end
+    object SpeedButton8: TSpeedButton
+      Left = 383
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = EditCopy
+      Images = ImageList1
+      ImageIndex = 8
+      ShowCaption = False
+      PopupMenu = MenuCopy
+    end
+    object SpeedButton9: TSpeedButton
+      Left = 406
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = EditPaste
+      Images = ImageList1
+      ImageIndex = 9
+      ShowCaption = False
+      PopupMenu = MenuPaste
+    end
+    object ToolButton4: TToolButton
+      Left = 618
+      Height = 23
+      Top = 2
+      Caption = 'ToolButton4'
+      Style = tbsDivider
+    end
+    object rbDrawSelect: TSpeedButton
+      Left = 572
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = DrawingSelect
+      GroupIndex = 1
+      Images = ImageList1
+      ImageIndex = 10
+      ShowCaption = False
+    end
+    object SpeedButton11: TSpeedButton
+      Left = 623
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = ToolBlur
+      Images = ImageList1
+      ImageIndex = 11
+      ShowCaption = False
+    end
+    object rbDrawArrow: TSpeedButton
+      Left = 526
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = DrawingArrow
+      GroupIndex = 1
+      Images = ImageList1
+      ImageIndex = 12
+      ShowCaption = False
+    end
+    object rbDrawText: TSpeedButton
+      Left = 549
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = DrawingText
+      GroupIndex = 1
+      Images = ImageList1
+      ImageIndex = 13
+      ShowCaption = False
+    end
+    object Label1: TLabel
+      Left = 697
+      Height = 23
+      Top = 2
+      Width = 37
+      AutoSize = False
+      Caption = 'Color:'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object Label2: TLabel
+      Left = 763
+      Height = 23
+      Top = 2
+      Width = 59
+      AutoSize = False
+      Caption = ' Font size:'
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object FColorButton: TColorButton
+      Left = 734
+      Height = 23
+      Top = 2
+      Width = 29
+      BorderWidth = 2
+      ButtonColorSize = 16
+      ButtonColor = clBlack
+    end
+    object ToolButton5: TToolButton
+      Left = 692
+      Height = 23
+      Top = 2
+      Caption = 'ToolButton5'
+      Style = tbsDivider
+    end
+    object FFontSize: TSpinEdit
+      Left = 822
+      Height = 24
+      Top = 2
+      Width = 50
+      AutoSelect = False
+      MaxValue = 120
+      MinValue = 10
+      TabOrder = 1
+      Value = 10
+    end
+    object SpeedButton14: TSpeedButton
+      Left = 355
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = EditUndo
+      Images = ImageList1
+      ImageIndex = 14
+      ShowCaption = False
+    end
+    object ToolButton6: TToolButton
+      Left = 319
+      Height = 23
+      Top = 2
+      Caption = 'ToolButton6'
+      Style = tbsDivider
+    end
+    object SpeedButton15: TSpeedButton
+      Left = 646
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = ToolErase
+      Images = ImageList1
+      ImageIndex = 16
+      ShowCaption = False
+    end
+    object SpeedButton16: TSpeedButton
+      Left = 669
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = ToolCrop
+      Images = ImageList1
+      ImageIndex = 17
+      ShowCaption = False
+    end
+    object Label3: TLabel
+      Left = 872
+      Height = 23
+      Top = 2
+      Width = 70
+      AutoSize = False
+      Caption = ' Line width:  '
+      Layout = tlCenter
+      ParentColor = False
+    end
+    object FLineWidth: TSpinEdit
+      Left = 942
+      Height = 24
+      Top = 2
+      Width = 42
+      MaxValue = 10
+      MinValue = 1
+      TabOrder = 2
+      Value = 1
+    end
+    object rbDrawTarget: TSpeedButton
+      Left = 595
+      Height = 23
+      Top = 2
+      Width = 23
+      Action = DrawingTarget
+      GroupIndex = 1
+      Images = ImageList1
+      ImageIndex = 19
+      ShowCaption = False
+    end
+    object ToolButton7: TToolButton
+      Left = 324
+      Top = 2
+      Action = ToolShot
+      ShowCaption = False
+    end
+    object ToolButton8: TToolButton
+      Left = 347
+      Height = 23
+      Top = 2
+      Caption = 'ToolButton8'
+      Style = tbsSeparator
+    end
+  end
+  object ScrollBox1: TScrollBox
+    Left = 0
+    Height = 450
+    Top = 26
+    Width = 1019
+    HorzScrollBar.Page = 735
+    VertScrollBar.Page = 431
+    Align = alClient
+    ClientHeight = 448
+    ClientWidth = 1017
+    TabOrder = 2
+    OnPaint = ScrollBox1Paint
+    object PaintBox1: TPaintBox
+      Left = 0
+      Height = 431
+      Top = 0
+      Width = 735
+      OnMouseDown = PaintBox1MouseDown
+      OnMouseMove = PaintBox1MouseMove
+      OnMouseUp = PaintBox1MouseUp
+      OnPaint = PaintBox1Paint
+    end
+  end
+  object ImageList1: TImageList
+    Left = 252
+    Top = 128
+    Bitmap = {
+      4C7A140000001000000010000000300F00000000000078DAED9B095414571686
+      9F464D624E32D926AB3AA0C42566929CD131BBC8A238A38982B40B2A2A904C26
+      2763826626313A71DF22BB11A3E0AE89368D4010944D16951D14106547641354
+      D66669B63BEF565158DD5475573772CE6878E7FCA7AADEBBDF7DF7DD77ABADEA
+      4642849BABA707B87ABA3372F170875DEEAEB0D3CD0576B8FC08DB77ED84AD3B
+      77C0961DDB8188F15E1ED0D6D6C648A552416B6B2B34373743636323D4D5D5C1
+      DDBB7761F3F66D5AF9F6F676469C0FE4954A650FBF69DB5671DE5398C7F9EBEB
+      EBA1A6A606366EDDA28577179D9FE3376CD904B3BD8ABE98B7F746EBF2C365B0
+      FC702923BCC69C71EB4769AE1FF9F59B3732B691251D905005107F0BE0622540
+      D88D0ED8E5E1C6CCC9E5AEA5A58599BBA1A1A167FD3F6CDA00386F226593A992
+      AA81F543F5A39B2BC3706A6A6AEA597B6D6D2DC3FF7723CB9FBFD9012B98D8CB
+      04540ACB50876E82FD811258E25B0CF37F2E826F4EDD84751BD733E3BB2FD683
+      7B5C1D133FEA12AEA37B2DB11500E74B3B20BCA81982AFD58022AD143CC2F2C1
+      ED6C29ACDBB09EF1FDE5A94A08296C83B86EFB986E45970344957541F88D7608
+      C953C2E9ACDB7032B904569F2C80F3999594FF01EC695C0E474A21AAA415224B
+      548C6D18D539AAB3C56D105AD40AC1794D1070B5164EA655C0D1F842B0F72D84
+      F2CA2A584BF945FB8B616D503984E6D4C2999C3AF8ED7A3D0452055C63E59F5D
+      0B7E9977E0D754CA2614C39EC83C58E47A91991B65BDA708BCCF97807F7A19F8
+      A597C3A9B472C616F54B4A399C482E8363892570F852211C88CD85EFE4B94CCD
+      707546CFAB309F8B7DEEC94E53FB8B689C85B0685F217CB2BBA889324F91FBD4
+      8E7F3A19162D6AD45BC8DD2FFE0EBD17F4D5007FFF784375BFF9D0A8705149E5
+      C5FC3CC4BCAC2FF9136F67CB0849BFC11E0D69C802B0477D9A6232211B06F7E6
+      1513B573C8441E2224A28A90A34FF4E6C3E83A227D583BA18663F52A42B26E0A
+      F3697984D4B51312E5D39B3DF33E21C535AC7D662921C1C38579BC2EA276C1EF
+      A9F331C18474D1B10EAAE870E1FCC584B3E3681713A4CEA7A4B2B6654D6CFE84
+      F62F600A1D57B27668CF6F69056C7F560921F2C785F383FD981B26A67C8DF933
+      D97ECC81D83EC9FF4CC76BBBE7CF541F8B0D61FBF9EBD76CD111EC38DAC59E51
+      1F0BB620E44677FE6B9A59DBD36FD03987B1F3E2754DCBBD18CF98F5F61F7194
+      90868E7B7160AC99341F376AEFCD8BE3682718DF10768C8B4353D88FE368A7AD
+      859AB3EB4BC9A0FB52C81EF11AFBFBB92D49873EB0D3181E8F06B04F3BE7C1D4
+      800EC0E3CC15EB6099E30AB077580E4B572C8325CBED61F1B2A5B0D87E09D82D
+      5D02BD62A6429613D727F4CCBD70891DE89A3FEA6A3DF3DC2FF4CEB0C06E9160
+      8EFEE6F05F66CEF3D9F5D0D1D1D1C373CFED1C2F5BB440905FEEE4C0F09D9D9D
+      5A79DB0532411EF3851C27B1F86DE6DB0AF334D7DCFB0EF7CE23F4CE666D3B4F
+      90C7BDE2BFEF70B1E37B07FF9D65AEAD8D304FF719E7E324F4CE72E7CE1D9833
+      CF5A905F4A6B04ED315E3C62CE90E5E6C6B533BC8D308F3586F69C90C379F9EC
+      EDDBB7E1139BB9823CD627DAF2851CAE9963ABAAAAE8FC223CAD6DB4E7183E87
+      AAAEAE667991F5E37D81B58DF58935368FD6898DCC96C9F75CCACCE9D65C11BE
+      DFDB7E789F91A1ECCF504FA5A4E7A606B2D02DE93E7AB3D27D88B3BAF9079155
+      C09BD4A641846DD0B5F78FC680DBD010B86850AE918F854C2AD0F02189FDC0ED
+      F0C4D70E5FE8429EE743729D4CDDE2B6C771B1158C3F18DDC5C41107AE4C3E24
+      B6A99B3D5CD007C641069AD616A320AB62FD888B216C9C8238C72A08507D37C0
+      F63F1BE74FD6FC1E58E60D86D664AC3F593D7087F6BD65CBC9B038399972C18F
+      CC46E139F6E9E22E9C2663E9E7C331BA8FCDDDB5CB5733DDE3A3F4F89AE0FEFB
+      918574AC852A39C68FAC880A2063A20F91C750784EFB1DE8FEA676FB9EAFC6D2
+      F8685F7B8C3FD944FFD51924161F6C2083A9DD16B48D5690C9BCDA3943152EB9
+      D6142492EA37DE752D5DF7A792797FF219550D8FAFD78BF723FFA04C1D2F7767
+      696E23F4E0A3281FC2BB7E9F5E77606E3047DAF247F7661B933F7FF2AEC6FDBB
+      84F6B752A5D1B53946CB8949BC9C3C8EC23DA7313AD1633A63E34FEC04DFE015
+      643C1D3B2E563F585B17E5649C94FAC5FDA59F25B35017E46452EA3E3274E0CE
+      EE9F26B05792C4E769FDB8D2DA924911DA6AF2D82FF91986DA0EF0F797EFEBFE
+      F5A57E061A214D27CC41532D81F39B5A4E984F35946FCF95832A6E5DAB141F6A
+      ECA959D01CB404DAAE1E838E8A4BA0BAB445D51AB3CE5995E8F5BA141E5955B2
+      472FB5E7FAB7B6277B4C15E3ABF6BE0799DF9B40F14F3305F92EE50DEAE3B4A0
+      0FE46B0F7E04A51E93A0FA988D20DF5111CFACA7EDCAFE464378BEA4C47FEBC4
+      6228F69AA6A6BA73FF3698D735BF66FE71AE3BA73F575353ECE67EE1F94D95E4
+      21D3377E215E9FFCF35B5BA2D7BBAA140FB936F5F7FD1C70C2FDEDD3C7BCDE32
+      8445EEF4710F7F94E2170F49DF8338D94DF7A5EAA00CA01447DDEFA0B86B1CA3
+      F2D1C277B4B5A9E05CE041E0184ED8876368A385075D0D6DA4F05DAA46E8BC9B
+      D74BDEEBED81A90D2A6D3CDAEA5B3FFDC16BDEFB28BC27A4F29AF79EBEF3F795
+      EF6BFC9AACF6F92D1BE22F44404A622CE4250619907FCB398E76D37FFDD46EBA
+      FCC48F9FC5F7F9F323C9D34F9BFEDF9E1F2E9D0F0414731E15E887E7F1514132
+      143346FB34ED34797DE6121BABF7367AB7D1DB582626519FDDF149E1395BA198
+      B4F1DAE2C73C49E5395B7D79CE87102F25FE9EF50BED9F84FC69DAEABB7F86D6
+      8414DBBED6EFC3D8EABC478D4619CA2BBD8D83E9BE0519C4EE35B2A22CA0EABD
+      47CFD2878543468F357A1B15703C9E639FE4B9F78C76BEC7B252EE31FA4AFADC
+      C6E59A3C5525B88D785C77CE8CBE166059ED355AA98BA776B9A2BCB771BEB6EF
+      37E97EBDA985ED8E61CC1B627CC31EE38F75F10D7B47CF16E57F1A3D56175FBF
+      678C898EF58789CEED3D3A54F7DE1BBD446D2F0BF0E94A1FE31725D5C0BE4943
+      957B8CEDA9AF038CF61A2FC5BE07EDFE0FB6367B0B65081BF489C58B21734D4B
+      42AD4DCB8365E6AFEAC3462F9FF618E5E243AC4D81D15CD394E08F270D97947B
+      420651E6580FDB2DEA4F8E63BAF833D653D76AB29C704CEA1ACE589BCAEE71A6
+      327DF337C03FD8FC83D49ABD4C46E0F3153E7BE9B2E59ECF90E17DE6E2F31954
+      1E995ECA3C3B6911DA747F9ECAF83EB15FE93D7A95EE7F1F47AF425BCD58B53D
+      538A3DAB8AF5058E3BE01738CE17D475C04F2AFFDB049F7783C6F9CA02C7FA26
+      A0F01CFBA4F2EA711CF0D337FE8785C79CF1F32666DBD7FAE96BFDF6F5FE79D8
+      5B56049976359C7C60289F1D45645723492B3D2E97629F1946C667479039C831
+      6C1471A33CA0B22389A7D86FD4D7CE9197A96D24672B26BA9E90FC50A2F67FB8
+      E8F5A35951244B172BC6D33857F0624CA5C765FAC44F7D1EE46CAE45913FE99B
+      3F3E7F3D9A18E9BB7FE8BB677D91240DAF3323C97B92F7584E8651364323577A
+      7D4F9E1D4D5EA2CC394379AE5D8F2463B17EF4897FA0DD6B582B583306B19164
+      21ADF166AC59BDDEF9E97B2D9D7343CFDED37B86BB7F702F33CE8BFFDD474618
+      7982CE795AE7BD1B41C2B0C60CE6595D11FA5B28ADF1D37B09EF299E8F65FAE6
+      8FC668CCFB0C39A0EFFEE9C3AB7D16D37BA8FBB3219D97477B3DEA41AE91BFCB
+      A9A9D2FF1647830FA5797C519FBA62E2A7F5732D5CF8EFCE069A7ADBE02C7B76
+      CDBF6C3F0A0D3CB8A020E7F2F992CCCC67A470FFF972E12BDFAF9429D6AE9CE7
+      EBB963B557EED5A446CA4341CE9554293EBE5F396FDFBAAF174C28CCBB3C8B32
+      2D2CCBE94AAA875391D6DF31D77C2573F4DAE1EC9F772DAD4D9D65959D9E71FD
+      EBBF541C771879FB1521BEF0FA65BBA8D0931DFBDCD7C27ECF7570EAB03B9C51
+      F842466AAC9A8F2F2756963A8EAC9AABF6EC9073653E1DEFE4EC72B35320E552
+      18C446F8ABF18C8FB48CAC2F2654D43A8EBA65C1F10539E93F0BC52CA214BA0E
+      77A75155691C9F9B7BE5D582DCCBF912D88CD2ECEC671D46567DEE38AA4AEDB7
+      D8E2ECE497E8F8352D6C1EDAA0ADE3A8EA3594EFF51DBA161F2545D7D27B9E69
+      1C47DEDA2DC48BF828CDC9C930E6DB388CAADA47F906B15AC8CFCF18519873F9
+      32C65C78FDCA58CD71C711A5CF7E6A54FDF6C0DDAEDEFAF27D89F2D4232055FD
+      C1379E7C4496BC7222A072B7BEEA86D77C294F0E71D5C6EB5A3FE3E377C253B9
+      A20FBE30A71C2F561F62DFBBA2705F381EAFFB83D7FABB8284F53FC0CD864AAE
+      A76C78BC7CC80B23E0490B592F910F05F4FC08E8F6D1C3A3EDF864E825122C20
+      DB6F91DF6E308F526F3DBC4948193C6966C31C05F98036207FFF27F25642FCD8
+      984678D4E44D18366A2C988456F466DFB30632FC29E4DF168BFFB5A81A786CFC
+      24C6073952D19B7549108D5FD30779751C904337D5592DEB57F3117E1B88D19B
+      401E1DCEB2BBE275E68FC9415C138CDA1BCDAE7FDA62607E961939818D635B34
+      90A395A23CC63D74C41896193C989D778D02C8CB26F40D6930DB8FF110B5F793
+      1EFE95CDBF3036C6BF64B0EBB7FE868D77D55196DD9D01C464129EFB68D6EF73
+      F6DF522E13063D328461070D1D06C4F908CB7B670319329465870C43DE56E0FE
+      E16A1263F3A6D2FCBEE5232A4F0DF6BEB70F3FBCF08CB979A2AD8545C22A0B8B
+      78677A9C676A1AFD34DF6696F9A429B34C27ABFD963B7DFAA51766CC483C6669
+      99D8BA6041569DA363411B0ACF2D2D135AADAC928ECC9C19F7C759A6EF4C9B6D
+      FAD72AF4C1B16666491367CC48AA76722A50B9B83482BFBF0A6263DB19E139F6
+      515FAA99D38FD7CE367DE7EEC76653CCD5E74DAA5EBDBABC4B2E57416D6D1754
+      5474425A5A3B233CC7BEDD1E2930D7723A58591EAE35354D7D9EE331669C17D9
+      A6A62E08085081BB7B8B9AF679A7C0E23956E0E99640E3C8575959251EE67285
+      EBC5F8700E64BDBC5A2035B51D94CA2E46FEF23498673503BC7727404D4D17EC
+      DAA504CC87A565EA1F30CFF3E767D5E31A314E9C0BD9A2A24EF0F169859DDB52
+      60D1C75620FF359119ABACEC048542053259663DF561636696F88D93537E5B5C
+      5C3BC3A10DCE89ECC61FD2C166C60CD8B13591E9C331CC07E614D76B6E9EB01A
+      85E742FC968DD9B0717D3AF8FAB6F6E231075C6D68C69F92D20EC5C59D0C87C2
+      F3E4E4F65EF19B9BC75B635D612EB8FC0506B2F9431F5CFE90C5BEA02015933F
+      17977BF9C33DC0BAC2DA38758ADD3FF4A1B97FC8E2D8C9932A7070C8A3FB97D4
+      F31D04D624AD01A67ED007C6817172F583E7382FB2AB579775D15ABB656191F4
+      1CBFF6E93EBE4E7D54615E707FF9F58BEBC598715E6469EC1384EE3BAC49AC2B
+      5C1BCD699D83437E1B0ACFBBEF9F039AF30A35CC0BD606BB3FF1CE98672E579A
+      ED7FD487D7D9
+    }
+  end
+  object ActionList1: TActionList
+    Images = ImageList1
+    Left = 337
+    Top = 144
+    object FileOpen1: TFileOpen
+      Category = 'File'
+      Caption = '&Open ...'
+      Hint = 'Open'
+      ImageIndex = 0
+      ShortCut = 16463
+      OnAccept = FileOpen1Accept
+    end
+    object FileSaveAs1: TFileSaveAs
+      Category = 'File'
+      Caption = 'Save &As ...'
+      Hint = 'Save As'
+      ImageIndex = 1
+      OnAccept = FileSaveAs1Accept
+    end
+    object FileExit1: TFileExit
+      Category = 'File'
+      Caption = 'E&xit'
+      Hint = 'Exit'
+      ImageIndex = 2
+    end
+    object FileNew: TAction
+      Category = 'File'
+      Caption = '&New'
+      DisableIfNoHandler = False
+      ImageIndex = 3
+      OnExecute = FileNewExecute
+    end
+    object DrawingFreehand: TAction
+      Category = 'Drawing'
+      Caption = 'Action1'
+      DisableIfNoHandler = False
+      GroupIndex = 1
+      Hint = 'Freehand'
+      ImageIndex = 4
+    end
+    object DrawingLine: TAction
+      Category = 'Drawing'
+      Caption = 'DrawingLine'
+      DisableIfNoHandler = False
+      GroupIndex = 1
+      Hint = 'Line'
+      ImageIndex = 5
+    end
+    object DrawingEllipse: TAction
+      Category = 'Drawing'
+      Caption = 'DrawingEllipse'
+      DisableIfNoHandler = False
+      GroupIndex = 1
+      Hint = 'Ellipse'
+      ImageIndex = 6
+    end
+    object DrawingRectangle: TAction
+      Category = 'Drawing'
+      Caption = 'DrawingRectangle'
+      DisableIfNoHandler = False
+      GroupIndex = 1
+      Hint = 'Rectangle'
+      ImageIndex = 7
+    end
+    object DrawingSelect: TAction
+      Category = 'Drawing'
+      Caption = 'DrawingSelect'
+      DisableIfNoHandler = False
+      GroupIndex = 1
+      Hint = 'Select'
+      ImageIndex = 10
+    end
+    object ToolBlur: TAction
+      Category = 'Tool'
+      Caption = 'ToolBlur'
+      DisableIfNoHandler = False
+      Hint = 'Hide'
+      ImageIndex = 11
+      OnExecute = ToolBlurExecute
+    end
+    object DrawingArrow: TAction
+      Category = 'Drawing'
+      Caption = 'DrawingArrow'
+      DisableIfNoHandler = False
+      GroupIndex = 1
+      Hint = 'Arrow'
+      ImageIndex = 12
+    end
+    object DrawingText: TAction
+      Category = 'Drawing'
+      Caption = 'DrawingText'
+      DisableIfNoHandler = False
+      GroupIndex = 1
+      Hint = 'Text'
+      ImageIndex = 13
+    end
+    object ToolErase: TAction
+      Category = 'Tool'
+      Caption = 'ToolErase'
+      DisableIfNoHandler = False
+      Hint = 'Fill'
+      ImageIndex = 16
+      OnExecute = ToolEraseExecute
+    end
+    object ToolCrop: TAction
+      Category = 'Tool'
+      Caption = 'ToolCrop'
+      DisableIfNoHandler = False
+      Hint = 'Crop'
+      ImageIndex = 17
+      OnExecute = ToolCropExecute
+    end
+    object EditUndo: TAction
+      Category = 'Edit'
+      Caption = 'EditUndo'
+      Hint = 'Undo'
+      ImageIndex = 14
+      OnExecute = EditUndoExecute
+      ShortCut = 16474
+    end
+    object EditCopy: TAction
+      Category = 'Edit'
+      Caption = 'EditCopy'
+      Hint = 'Copy'
+      ImageIndex = 8
+      OnExecute = EditCopyExecute
+      ShortCut = 16451
+    end
+    object EditPaste: TAction
+      Category = 'Edit'
+      Caption = 'EditPaste'
+      Hint = 'Paste'
+      ImageIndex = 9
+      OnExecute = EditPasteExecute
+      ShortCut = 16470
+    end
+    object EditCopySelection: TAction
+      Category = 'Edit'
+      Caption = 'Copy selection only'
+      OnExecute = EditCopySelectionExecute
+    end
+    object EditPasteAsLayer: TAction
+      Category = 'Edit'
+      Caption = 'Paste as layer'
+      OnExecute = EditPasteAsLayerExecute
+    end
+    object DrawingTarget: TAction
+      Category = 'Drawing'
+      Caption = 'Target'
+      DisableIfNoHandler = False
+      ImageIndex = 19
+      OnExecute = DrawingTargetExecute
+    end
+    object ToolShot: TAction
+      Category = 'Tool'
+      Caption = 'ToolShot'
+      ImageIndex = 18
+      OnExecute = ToolShotExecute
+    end
+  end
+  object MenuCopy: TPopupMenu
+    Left = 510
+    Top = 111
+    object MenuItem1: TMenuItem
+      Action = EditCopySelection
+    end
+  end
+  object MenuPaste: TPopupMenu
+    Left = 601
+    Top = 111
+    object MenuItem2: TMenuItem
+      Action = EditPasteAsLayer
+    end
+  end
+end
