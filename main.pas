@@ -189,6 +189,8 @@ var
   TempCanvas: TCanvas;
 begin
   if TShotDlg.Execute(Region, Options, Delay) then begin
+    Application.ProcessMessages;
+    Application.ProcessMessages;
     if Delay <> 0 then begin
       Sleep(Cardinal(Delay*1000));
     end;
