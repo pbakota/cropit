@@ -8,7 +8,7 @@ object MainForm: TMainForm
   ClientWidth = 1019
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  Position = poDefault
+  Position = poWorkAreaCenter
   object StatusBar1: TStatusBar
     Left = 0
     Height = 22
@@ -502,6 +502,7 @@ object MainForm: TMainForm
     object FileSaveAs1: TFileSaveAs
       Category = 'File'
       Caption = 'Save &As ...'
+      Dialog.Filter = 'PNG images|*.png|All files|*.*'
       Hint = 'Save As'
       ImageIndex = 1
       OnAccept = FileSaveAs1Accept
