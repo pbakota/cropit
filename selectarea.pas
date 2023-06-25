@@ -53,6 +53,7 @@ begin
   FStartPos.X := X;
   FStartPos.Y := Y;
   FSelection := Rect(0,0,0,0);
+  FOverlay.Canvas.Draw(0,0,FBitmap);
 end;
 
 procedure TSelectArea.PaintBox1MouseMove(Sender: TObject;
@@ -62,13 +63,12 @@ var
 begin
   if not FMouseDown then Exit;
 
-  PaintBox1.Repaint;
-
   EndPos.X := X;
   EndPos.Y := Y;
 
   with FOverlay.Canvas do begin
-    CopyRect(Rect(0,0,Width,Height), FBitmap.Canvas, Rect(Left,Top,Left+Width,Top+Height));
+    SaveHandleState;
+    Draw(0,0,FBitmap);
     Brush.Style := bsClear;
     Pen.Style := psDash;
     Pen.Width := 3;
@@ -76,7 +76,10 @@ begin
     Pen.Mode:=pmXor;
     Rectangle(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
     Pen.Mode := pmCopy;
+    RestoreHandleState;
   end;
+
+  PaintBox1.Repaint;
 end;
 
 procedure TSelectArea.PaintBox1MouseUp(Sender: TObject;
@@ -99,8 +102,7 @@ begin
   if FMouseDown then
     PaintBox1.Canvas.Draw(0,0,FOverlay)
   else
-    with Screen.PrimaryMonitor do
-      PaintBox1.Canvas.CopyRect(Rect(0,0,Width,Height), FBitmap.Canvas, Rect(Left,Top,Left+Width,Top+Height));
+    PaintBox1.Canvas.Draw(0,0,FBitmap);
 end;
 
 procedure TSelectArea.Timer1Timer(Sender: TObject);
@@ -116,17 +118,12 @@ begin
   frm:=TSelectArea.Create(nil);
   try
     with frm do begin
-      //with Screen.PrimaryMonitor do
-      //  WriteLn(Format('Primary %d,%d - %d,%d', [Left,Top,Width,Height]));
-
       FBitmap := ABitmap;
       FOverlay := TBitmap.Create;
-      with Screen.PrimaryMonitor do begin
-       FOverlay.SetSize(Width, Height);
-       FOverlay.Canvas.CopyRect(Rect(0,0,Width,Height), FBitmap.Canvas, Rect(Left,Top,Left+Width,Top+Height));
-      end;
-
       try
+        FOverlay.SetSize(FBitmap.Width, FBitmap.Height);
+        FOverlay.Canvas.Draw(0,0,FBitmap);
+
         WindowState := wsFullScreen;
         BorderStyle:=bsNone;
         KeyPreview:=True;
@@ -136,13 +133,13 @@ begin
           if FSelection.IsEmpty then
             Result := False
           else begin
-            with Screen.PrimaryMonitor do begin
-              Selection.SetSize(FSelection.Width,FSelection.Height);
-              Selection.Canvas.CopyRect(Rect(0,0,FSelection.Width,FSelection.Height),FBitmap.Canvas,Rect(
-                Left+FSelection.Left,
-                Top+FSelection.Top,
-                Left+FSelection.Left+FSelection.Width,
-                Top+FSelection.Top+FSelection.Height
+            with FSelection do begin
+              Selection.SetSize(Width,Height);
+              Selection.Canvas.CopyRect(Rect(0,0,Width,Height),FBitmap.Canvas,Rect(
+                Left,
+                Top,
+                Left+Width,
+                Top+Height
               ));
             end;
           end;

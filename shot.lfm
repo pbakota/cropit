@@ -1,13 +1,14 @@
 object ShotDlg: TShotDlg
   Left = 2170
-  Height = 290
+  Height = 275
   Top = 250
   Width = 320
   BorderStyle = bsDialog
   Caption = 'Screenshot'
-  ClientHeight = 290
+  ClientHeight = 275
   ClientWidth = 320
-  Position = poMainFormCenter
+  OnCreate = FormCreate
+  Position = poWorkAreaCenter
   object Label1: TLabel
     Left = 8
     Height = 15
@@ -52,28 +53,10 @@ object ShotDlg: TShotDlg
       TabOrder = 1
     end
   end
-  object chkIncludeWindowTitle: TCheckBox
-    Left = 8
-    Height = 21
-    Top = 168
-    Width = 211
-    Caption = 'Include window title and frame'
-    Enabled = False
-    TabOrder = 1
-  end
-  object chkIncludeMouseCursor: TCheckBox
-    Left = 8
-    Height = 21
-    Top = 192
-    Width = 155
-    Caption = 'Include mouse cursor'
-    Enabled = False
-    TabOrder = 2
-  end
   object Label2: TLabel
     Left = 118
     Height = 15
-    Top = 221
+    Top = 205
     Width = 79
     Caption = 'Delay (secs):'
     ParentColor = False
@@ -81,31 +64,51 @@ object ShotDlg: TShotDlg
   object edtDelay: TSpinEdit
     Left = 200
     Height = 24
-    Top = 216
+    Top = 200
     Width = 112
     EditorEnabled = False
     MaxValue = 60
-    TabOrder = 3
+    TabOrder = 1
   end
   object BitBtn1: TBitBtn
     Left = 152
     Height = 30
-    Top = 248
+    Top = 232
     Width = 75
     Cancel = True
     DefaultCaption = True
     Kind = bkCancel
     ModalResult = 2
-    TabOrder = 4
+    TabOrder = 2
   end
   object BitBtn2: TBitBtn
     Left = 237
     Height = 30
-    Top = 248
+    Top = 232
     Width = 75
     DefaultCaption = True
     Kind = bkOK
     ModalResult = 1
+    TabOrder = 3
+  end
+  object chkCaptureMonitor: TCheckBox
+    Left = 8
+    Height = 21
+    Top = 168
+    Width = 116
+    Caption = 'Capture output'
+    Checked = True
+    OnChange = chkCaptureMonitorChange
+    State = cbChecked
+    TabOrder = 4
+  end
+  object cbMonitors: TComboBox
+    Left = 128
+    Height = 23
+    Top = 168
+    Width = 184
+    ItemHeight = 23
+    Style = csDropDownList
     TabOrder = 5
   end
 end

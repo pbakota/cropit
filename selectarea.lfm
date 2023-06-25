@@ -12,6 +12,7 @@ object SelectArea: TSelectArea
   ClientWidth = 175
   OnKeyDown = FormKeyDown
   ShowInTaskBar = stNever
+  LCLVersion = '2.2.6.0'
   object PaintBox1: TPaintBox
     Cursor = crCross
     Left = 0

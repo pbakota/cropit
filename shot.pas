@@ -10,16 +10,14 @@ uses
 
 type
   TShotRegion = (reScreen, reWindow, reArea);
-  TShotOption = (opWindowTitle, opMouseCursor);
-  TShotOptions = set of TShotOption;
 
   { TShotDlg }
 
   TShotDlg = class(TForm)
     BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
-    chkIncludeWindowTitle: TCheckBox;
-    chkIncludeMouseCursor: TCheckBox;
+    chkCaptureMonitor: TCheckBox;
+    cbMonitors: TComboBox;
     GroupBox1: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
@@ -27,10 +25,12 @@ type
     rbCurrentWindow: TRadioButton;
     rbArea: TRadioButton;
     edtDelay: TSpinEdit;
+    procedure chkCaptureMonitorChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
 
   public
-    class function Execute(var Region: TShotRegion; var Options: TShotOptions; var Delay: Cardinal): Boolean; static;
+    class function Execute(var Region: TShotRegion; var MonitorIndex: Integer; var Delay: Cardinal): Boolean; static;
   end;
 
 implementation
@@ -39,7 +39,35 @@ implementation
 
 { TShotDlg }
 
-class function TShotDlg.Execute(var Region: TShotRegion; var Options: TShotOptions; var Delay: Cardinal): Boolean;
+procedure TShotDlg.FormCreate(Sender: TObject);
+var
+  I: Integer;
+begin
+  cbMonitors.Clear;
+  for I:=0 to Screen.MonitorCount-1 do begin
+    if Screen.Monitors[I].Primary then
+      cbMonitors.Items.Add('Primary monitor')
+    else
+      cbMonitors.Items.Add(Format('Monitor #%d',[I+1]));
+  end;
+  cbMonitors.ItemIndex:=0;
+  if Screen.MonitorCount = 1 then
+    cbMonitors.Enabled:=False;
+
+  {$IFDEF LCLQT5}
+    {$IFDEF LINUX}
+    // NOTE: Not working on Linux (X11)
+      rbCurrentWindow.Enabled := False;
+    {$ENDIF}
+  {$ENDIF}
+end;
+
+procedure TShotDlg.chkCaptureMonitorChange(Sender: TObject);
+begin
+  cbMonitors.Enabled:=chkCaptureMonitor.Checked;
+end;
+
+class function TShotDlg.Execute(var Region: TShotRegion; var MonitorIndex: Integer; var Delay: Cardinal): Boolean;
 var
   frm: TShotDlg;
 begin
@@ -50,11 +78,12 @@ begin
       Result := ShowModal = mrOK;
       if Result then begin
         Delay := edtDelay.Value;
-        Options := [];
-        if chkIncludeWindowTitle.Checked then
-          Options := Options + [opWindowTitle];
-        if chkIncludeMouseCursor.Checked then
-          Options := Options + [opMouseCursor];
+
+        if chkCaptureMonitor.Checked then
+          MonitorIndex := cbMonitors.ItemIndex
+        else
+          MonitorIndex:= -1;
+
         if rbWholeScreen.Checked then
           Region := reScreen
         else if rbCurrentWindow.Checked then
