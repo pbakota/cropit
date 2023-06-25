@@ -224,6 +224,8 @@ begin
             NewBitmap(ScreenBitmap.Width, ScreenBitmap.Height);
             FBitmap.Canvas.Draw(0,0,ScreenBitmap);
           end;
+
+          FixBitmap(FBitmap);
           UpdateOverlay;
         end;
         reWindow: begin
@@ -238,6 +240,7 @@ begin
             NewBitmap(ScreenBitmap.Width, ScreenBitmap.Height);
             FBitmap.Canvas.Draw(0,0,ScreenBitmap);
 
+            FixBitmap(FBitmap);
             UpdateOverlay;
           finally
             TempCanvas.Free;
@@ -268,7 +271,9 @@ begin
                 NewBitmap(Selection.Width, Selection.Height);
                 FBitmap.Canvas.Draw(0,0,Selection);
 
+                FixBitmap(FBitmap);
                 UpdateOverlay;
+
                 FExitOnCancel:=False;
               end
             finally
@@ -473,8 +478,11 @@ end;
 
 procedure TMainForm.UpdateOverlay;
 begin
+  {$IFDEF WIN32}
+  {$ELSE}
   FOverlay.SetSize(FBitmap.Width, FBitmap.Height);
   FOverlay.Canvas.Draw(0,0,FBitmap);
+  {$ENDIF}
 end;
 
 procedure TMainForm.DrawTarget(ACanvas: TCanvas; X, Y: Integer);
@@ -529,19 +537,27 @@ procedure TMainForm.PaintBox1MouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
 var
   EndPos: TPoint;
+  DrawingCanvas: TCanvas;
 begin
   if not FMouseDown then Exit;
   EndPos.X := X;
   EndPos.Y := Y;
 
-  if Assigned(FOverlay) then begin
-    with FOverlay.Canvas do begin
-      Pen.Color := FColorButton.ButtonColor;
-      Pen.Width := FLineWidth.Value;
-      Pen.Style := psSolid;
-    end;
-    FOverlay.Canvas.Draw(0,0,FBitmap);
+  {$IFDEF WIN32}
+  DrawingCanvas := PaintBox1.Canvas;
+  {$ELSE}
+  DrawingCanvas := FOverlay.Canvas;
+  {$ENDIF}
+
+  with DrawingCanvas do begin
+    Pen.Color := FColorButton.ButtonColor;
+    Pen.Width := FLineWidth.Value;
+    Pen.Style := psSolid;
   end;
+  {$IFDEF WIN32}
+  {$ELSE}
+  FOverlay.Canvas.Draw(0,0,FBitmap);
+  {$ENDIF}
 
   PaintBox1.Repaint;
 
@@ -570,30 +586,30 @@ begin
       FStartPos := EndPos;
     end;
     dtLine: begin
-      with FOverlay.Canvas do begin
+      with DrawingCanvas do begin
         Line(FStartPos, EndPos);
       end;
     end;
     dtEllipse: begin
-      with FOverlay.Canvas do begin
+      with DrawingCanvas do begin
         Brush.Style := bsClear;
         Ellipse(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
       end;
     end;
     dtRect: begin
-      with FOverlay.Canvas do begin
+      with DrawingCanvas do begin
         Brush.Style := bsClear;
         Rectangle(FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
       end;
     end;
     dtArrow: begin
-      with FOverlay.Canvas do begin
+      with DrawingCanvas do begin
         Brush.Style := bsClear;
-        DrawArrow(FOverlay.Canvas, FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
+        DrawArrow(DrawingCanvas, FStartPos.X, FStartPos.Y, EndPos.X, EndPos.Y);
       end;
     end;
     dtText: begin
-      with FOverlay.Canvas do begin
+      with DrawingCanvas do begin
         SaveHandleState;
         Brush.Style := bsClear;
         Pen.Style := psDash;
@@ -606,7 +622,7 @@ begin
       end;
     end;
     dtSelect: begin
-      with FOverlay.Canvas do begin
+      with DrawingCanvas do begin
         SaveHandleState;
         Brush.Style := bsClear;
         Pen.Style := psDash;
@@ -620,7 +636,7 @@ begin
       StatusBar1.SimpleText := Format('Selection: %dx%d', [Abs(EndPos.X-FStartPos.X), Abs(EndPos.Y-FStartPos.Y)]);
     end;
     dtTarget: begin
-      DrawTarget(FOverlay.Canvas,FStartPos.X,FStartPos.Y);
+      DrawTarget(DrawingCanvas,FStartPos.X,FStartPos.Y);
       FStartPos := EndPos;
     end;
   end;
@@ -632,10 +648,17 @@ var
   EndPos: TPoint;
   AText: string;
   style: TTextStyle;
+  DrawingCanvas: TCanvas;
 begin
   FMouseDown := False;
   EndPos.X := X;
   EndPos.Y := Y;
+
+  {$IFDEF WIN32}
+  DrawingCanvas := PaintBox1.Canvas;
+  {$ELSE}
+  DrawingCanvas := FOverlay.Canvas;
+  {$ENDIF}
 
   if Assigned(FLayer) then begin
     if not FMoveLayer then begin
@@ -656,8 +679,7 @@ begin
     Pen.Style := psSolid;
   end;
 
-  if Assigned(FOverlay) then
-    FOverlay.Canvas.Draw(0,0,FBitmap);
+  DrawingCanvas.Draw(0,0,FBitmap);
 
   case GetCurDrawingTool of
     dtNone: begin
@@ -720,7 +742,7 @@ begin
     FSelection.NormalizeRect;
     StatusBar1.SimpleText := Format('Selection: %dx%d', [Abs(FSelection.Width), Abs(FSelection.Height)]);
     // Make selected are visible even when the mouse button is released.
-    with FOverlay.Canvas do begin
+    with DrawingCanvas do begin
       //SaveHandleState;
       Brush.Style := bsClear;
       Pen.Style := psDash;
@@ -748,10 +770,14 @@ begin
     end;
   end
   else if Assigned(FBitmap) then begin
+    {$IFDEF WIN32}
+    PaintBox1.Canvas.Draw(0,0,FBitmap);
+    {$ELSE}
     if FMouseDown or ValidSelection then
       PaintBox1.Canvas.Draw(0,0,FOverlay)
     else
       PaintBox1.Canvas.Draw(0,0,FBitmap);
+    {$ENDIF}
   end;
 end;
 
