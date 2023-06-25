@@ -311,6 +311,7 @@ object MainForm: TMainForm
     object rbDrawTarget: TSpeedButton
       Left = 595
       Height = 23
+      Hint = 'Mark'
       Top = 2
       Width = 23
       Action = DrawingTarget
@@ -321,6 +322,7 @@ object MainForm: TMainForm
     end
     object ToolButton7: TToolButton
       Left = 324
+      Hint = 'Take a shot'
       Top = 2
       Action = ToolShot
       ShowCaption = False

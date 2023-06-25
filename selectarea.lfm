@@ -1,4 +1,5 @@
 object SelectArea: TSelectArea
+  Cursor = crCross
   Left = 2170
   Height = 131
   Top = 250
@@ -12,6 +13,7 @@ object SelectArea: TSelectArea
   OnKeyDown = FormKeyDown
   ShowInTaskBar = stNever
   object PaintBox1: TPaintBox
+    Cursor = crCross
     Left = 0
     Height = 131
     Top = 0

@@ -70,7 +70,7 @@ begin
   with FOverlay.Canvas do begin
     CopyRect(Rect(0,0,Width,Height), FBitmap.Canvas, Rect(Left,Top,Left+Width,Top+Height));
     Brush.Style := bsClear;
-    Pen.Style := psDashDot;
+    Pen.Style := psDash;
     Pen.Width := 3;
     Pen.Color := clWhite;
     Pen.Mode:=pmXor;
