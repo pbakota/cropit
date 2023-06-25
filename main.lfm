@@ -9,10 +9,11 @@ object MainForm: TMainForm
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poWorkAreaCenter
+  LCLVersion = '2.2.6.0'
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 22
-    Top = 476
+    Height = 23
+    Top = 475
     Width = 1019
     Panels = <>
   end
@@ -242,7 +243,7 @@ object MainForm: TMainForm
     end
     object FFontSize: TSpinEdit
       Left = 822
-      Height = 24
+      Height = 23
       Top = 2
       Width = 50
       AutoSelect = False
@@ -300,7 +301,7 @@ object MainForm: TMainForm
     end
     object FLineWidth: TSpinEdit
       Left = 942
-      Height = 24
+      Height = 23
       Top = 2
       Width = 42
       MaxValue = 10
@@ -337,14 +338,14 @@ object MainForm: TMainForm
   end
   object ScrollBox1: TScrollBox
     Left = 0
-    Height = 450
+    Height = 449
     Top = 26
     Width = 1019
     HorzScrollBar.Page = 735
     VertScrollBar.Page = 431
     Align = alClient
-    ClientHeight = 448
-    ClientWidth = 1017
+    ClientHeight = 445
+    ClientWidth = 1015
     TabOrder = 2
     OnPaint = ScrollBox1Paint
     object PaintBox1: TPaintBox
