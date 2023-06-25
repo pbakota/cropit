@@ -202,6 +202,8 @@ begin
           ScreenBitmap.LoadFromDevice(DC);
           NewBitmap(ScreenBitmap.Width, ScreenBitmap.Height);
           FBitmap.Canvas.Draw(0,0,ScreenBitmap);
+
+          UpdateOverlay;
         end;
         reWindow: begin
           TempCanvas := TCanvas.Create;
@@ -212,6 +214,8 @@ begin
             ScreenBitmap.LoadFromDevice(DC);
             NewBitmap(ScreenBitmap.Width, ScreenBitmap.Height);
             FBitmap.Canvas.Draw(0,0,ScreenBitmap);
+
+            UpdateOverlay;
           finally
             TempCanvas.Free;
           end;
@@ -653,6 +657,7 @@ begin
       end;
     end;
     dtTarget: begin
+      SaveUndo;
       DrawTarget(FBitmap.Canvas,FStartPos.X,FStartPos.Y);
       Inc(FTargetNumbering);
     end;
