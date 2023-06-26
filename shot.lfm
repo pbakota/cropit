@@ -9,6 +9,7 @@ object ShotDlg: TShotDlg
   ClientWidth = 320
   OnCreate = FormCreate
   Position = poWorkAreaCenter
+  LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 8
     Height = 15
@@ -23,8 +24,8 @@ object ShotDlg: TShotDlg
     Top = 32
     Width = 304
     Caption = 'Region'
-    ClientHeight = 105
-    ClientWidth = 298
+    ClientHeight = 111
+    ClientWidth = 286
     TabOrder = 0
     object rbWholeScreen: TRadioButton
       Left = 16

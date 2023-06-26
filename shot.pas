@@ -51,8 +51,10 @@ begin
       cbMonitors.Items.Add(Format('Monitor #%d',[I+1]));
   end;
   cbMonitors.ItemIndex:=0;
-  if Screen.MonitorCount = 1 then
+  if Screen.MonitorCount = 1 then begin
     cbMonitors.Enabled:=False;
+    chkCaptureMonitor.Enabled:=False;
+  end;
 
   {$IFDEF LCLQT5}
     {$IFDEF LINUX}
